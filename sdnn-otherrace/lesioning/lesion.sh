@@ -94,11 +94,10 @@ echo '----------------------------------'
 
 
 
-# echo
-# echo 'sourcing conda....'
-# shift 3 # clears the argument list from conflicting with anaconda (see 'echo $@')
-# source /mindhive/nklab4/users/juliom/anaconda3/bin/activate
-# conda activate torchenv-gpu
+echo
+echo 'sourcing the environment....'
+source ../../env/bin/activate
+
 
 
 echo 'sourcing complete'
