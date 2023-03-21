@@ -111,4 +111,3 @@ umask 0002
 CUDA_VISIBLE_DEVICES=0 python lesion.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --greedy_p $GREEDY_P --group_p $GROUP_P --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --max_batches $MAX_BATCHES --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --iterator_seed $ITER_SEED_TYPE --maxout $MAXOUT --read_seed $READ_SEED --randomize_classes $RAND_CLASSES --randomize_classes_seed $RAND_CLASSES_SEED
 # --subgroups_file $SUBGROUPS_FILE # -
 
-READ_SEED
