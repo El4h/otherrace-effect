@@ -29,9 +29,9 @@
 #NONSORT_TASK_INDEX=1
 
 
-SORT_TASK_INDEX=$1 # (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) # for vgg16
-NONSORT_TASK_INDEX=$2
-PARAM_GROUP_INDEX=$3
+SORT_TASK_INDEX=$1 # (0 1)
+NONSORT_TASK_INDEX=$2  # it is 2 because in theory it can be used for any number of tasks 
+PARAM_GROUP_INDEX=$3 #  2 3 4 5 6 7 8 9 10 11 12 13 14 15) # for vgg16
 
 # vgg
 CONFIG_FILE='/om2/user/juliom/projects/moco/configs/moco1_vgg16_transfer_classifier_facecar_inanimate1.json'
