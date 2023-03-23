@@ -34,7 +34,7 @@
 
 SORT_TASK_INDEX=$1  #can be 0 or 1
 NONSORT_TASK_INDEX=$0
-PARAM_GROUP_INDEX=$12 # 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # for vgg16 what layer we are lesioning
+PARAM_GROUP_INDEX=${12}# 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # for vgg16 what layer we are lesioning
 
 
 CONFIG_FILE='./configs/vgg/face_dual_whitasia.yaml'
@@ -94,9 +94,9 @@ echo '----------------------------------'
 
 
 
-echo
-echo 'sourcing the environment....'
-source ../../env/bin/activate
+# echo
+# echo 'sourcing the environment....'
+# source ../../env/bin/activate
 
 
 
