@@ -9,11 +9,11 @@ import copy
 import random
 
 # add the current directory to the PYTHONPATH so the custom modules can be imported
-sys.path.append('/home/elaheh_akbari/new/')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
+# sys.path.append('/home/elaheh_akbari/new/')
+# sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
+# sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
+# sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
+# sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
 
 # custom modules
 import models
