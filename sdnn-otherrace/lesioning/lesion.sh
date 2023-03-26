@@ -32,12 +32,12 @@
 #NONSORT_TASK_INDEX=1
 
 
-SORT_TASK_INDEX=$1  #can be 0 or 1
-NONSORT_TASK_INDEX=$0
-PARAM_GROUP_INDEX=${12}# 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # for vgg16 what layer we are lesioning
+SORT_TASK_INDEX=1  #can be 0 or 1
+NONSORT_TASK_INDEX=2
+PARAM_GROUP_INDEX=12 # 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # for vgg16 what layer we are lesioning
 
 
-CONFIG_FILE='./configs/vgg/face_dual_whitasia.yaml'
+CONFIG_FILE='configs/vgg/face_dual_whitasia.json'
 #CONFIG_FILE='/om2/user/juliom/projects/moco/configs/moco1_vgg16_transfer_classifier_facecar_inanimate1.json'
 #CONFIG_FILE='/om2/user/juliom/projects/moco/configs/moco1_vgg16_classifier_transfer_from_saycam_to_facecar_inanimate1.json'
 
