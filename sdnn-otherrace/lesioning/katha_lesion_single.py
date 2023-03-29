@@ -1,19 +1,11 @@
 # imports
 import os
-import sys
-sys.path.append('/home/elaheh_akbari/new/')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
-
-from utils.tools import precision
 import glob
 import numpy as np
 import copy
 from utils import helper
 from sklearn import metrics
-# import tqdm
+import tqdm
 import torch
 import torchvision
 import torchvision.models as models
@@ -31,6 +23,8 @@ from filelock import Timeout
 from filelock import SoftFileLock as FileLock
 import random
 import pprint
+import yaml
+
 pp = pprint.PrettyPrinter(indent=1)
 lock_timeout = 30*2
 acquire_timeout = 30*2
@@ -109,15 +103,15 @@ class Validator(object):
         loss = self.criterion(output,y)
         return loss.item(), prec_1, prec_5, output
 
-def get_model(config_file, config, ngpus, dataParallel=False, pretrained=False, epoch=-1):
+def get_model(config, ngpus, dataParallel=False, pretrained=False, epoch=-1):
  
     model_names = sorted(name for name in models.__dict__
         if name.islower() and not name.startswith("__")
         and callable(models.__dict__[name]))
     
-    num_classes = utils.tools.get_num_classes(config["data_dirs"], islist=True)
-    model = models.__dict__[config["arch"]](num_classes=num_classes)
-    print("Initialized model with", config["arch"], "architecture.")
+    num_classes = utils.tools.get_num_classes(list(config["data"].values()), islist=True)
+    model = models.__dict__[config["architecture"]["model"]](num_classes=num_classes)
+    print("Initialized model with", config["architecture"]["model"], "architecture.")
     
     if dataParallel:
         print('\nApplying DataParallel...')
@@ -129,13 +123,14 @@ def get_model(config_file, config, ngpus, dataParallel=False, pretrained=False, 
     if pretrained:
         pretrained_path = utils.tools.get_checkpoint(
             epoch=epoch,
-            checkpoints_dir=os.path.join(config["checkpoints"],os.path.basename(config_file)[:-5])
+            checkpoints_dir=os.path.join(config["save_directories"]["checkpoints_dir"],config["project"]["name"])
         )
         if ngpus > 0:
-            ckpt_data = torch.load(pretrained_path)
+            ckpt_data = torch.load(pretrained_path) #torch.load(pretrained_path)  
         else:
             ckpt_data = torch.load(pretrained_path, map_location=torch.device('cpu'))
-        model.load_state_dict(ckpt_data['model_state_dict'])
+        print(list(ckpt_data.keys()))
+        model.load_state_dict(ckpt_data['state_dict']) # 'model_state_dict'
         print('\nLoaded pretrained model from:', pretrained_path)
     return model
 
@@ -1426,8 +1421,8 @@ def run_lesion():
     parser.add_argument('--batch_size',           default=128,          type=int,   help='batch size')
     parser.add_argument('--max_batches',          default=5,            type=int,   help='batches to run on train losses')
     parser.add_argument('--workers',              default=4,            type=int,   help='read and write workers')
-    parser.add_argument('--sort_task_index',      default=0,            type=int,   help='sort_task_index + 1')
-    parser.add_argument('--nonsort_task_index',   default=1,            type=int,   help='nonsort_task_index + 1')
+    parser.add_argument('--sort_task_index',      default=0,     choices=[0, 1],    type=int, help='0=first, 1=second')
+    parser.add_argument('--nonsort_task_index',   default=1,     choices=[0, 1, -1],type=int, help='0=first, 1=second')
     parser.add_argument('--restore_epoch',        default=-1,           type=int,   help='epoch to restore from')
     parser.add_argument('--lesion_name',          default='',           type=str,   help='save suffix identifier')
     parser.add_argument('--read_suffix',          default='',           type=str,   help='read suffix identifier')
@@ -1441,7 +1436,6 @@ def run_lesion():
     parser.add_argument('--write_predictions',    default="False",     type=str, help='write y_true and y_pred for lesions')
     parser.add_argument('--subgroups_file',       default=None, type=str, help='array file for categ2subgroup')
     
-    
     FLAGS, FIRE_FLAGS = parser.parse_known_args()
     
     # converts strings to corresponding boolean values
@@ -1451,6 +1445,9 @@ def run_lesion():
     FLAGS.maxout = True if (FLAGS.maxout == 'True') else False
     FLAGS.randomize_classes = True if (FLAGS.randomize_classes == 'True') else False
     FLAGS.write_predictions = True if (FLAGS.write_predictions == 'True') else False
+    
+    print(FLAGS)
+    print(flush=True)
     
     if FLAGS.ngpus > 0:
         torch.backends.cudnn.benchmark = True
@@ -1462,21 +1459,27 @@ def run_lesion():
     
     # Get Config File
     with open(FLAGS.config_file) as f:
-        config = json.load(f)
-        print("Config File:\n-------------")
+        config = yaml.load(f, Loader=yaml.FullLoader)
+        print("Loaded Config File:\n---------------------------------------")
         pp.pprint(config)
+        print(flush=True)
     
-    model = get_model(config_file=FLAGS.config_file, config=config, ngpus=FLAGS.ngpus, dataParallel=True, pretrained=True)
+    model = get_model(config=config, ngpus=FLAGS.ngpus, dataParallel=True, pretrained=True)
     
     layerMap = helper.getLayerMapping(model)
         
-    config["batch_size"] = FLAGS.batch_size
-    tasks = list(config["max_valid_samples"].keys())
-    tasks.sort()
-    sort_task = tasks[FLAGS.sort_task_index]
-    nonsort_task = tasks[FLAGS.nonsort_task_index]
-    print('sort_task:', sort_task)
-    print('nonsort_task:', nonsort_task)
+    config["hyperparameters"]["batch_size"] = FLAGS.batch_size
+    tasks = list(config["max_samples"]["valid"].keys())
+    if config["project"]["num_tasks"] > 1:
+        tasks.sort()
+        sort_task = tasks[FLAGS.sort_task_index]
+        nonsort_task = tasks[FLAGS.nonsort_task_index]
+        print('sort_task:', sort_task)
+        print('nonsort_task:', nonsort_task)
+    else:
+        sort_task = tasks[0]
+        print('sort_task:', sort_task)
+    task_to_sort_by = sort_task
     
     ###########################################################################
     ###########################################################################
@@ -1487,17 +1490,16 @@ def run_lesion():
     # validator sort_task train data
     # --------------------------
     with open(FLAGS.config_file) as f:
-        config_sort_task_train_data = json.load(f)
+        config_sort_task_train_data = yaml.load(f, Loader=yaml.FullLoader)
     #config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
-    config_sort_task_train_data["max_train_samples"][nonsort_task] = 0
-    print("Config File:\n-------------")
-    pp.pprint(config_sort_task_train_data)
+    if config_sort_task_train_data["project"]["num_tasks"] > 1:
+        config_sort_task_train_data["max_samples"]["train"][nonsort_task] = 0
     validator_sort_task_train_data = Validator(name='sort_task_train_data', 
                                                model=model, 
                                                batch_size=FLAGS.batch_size,
-                                               data_dir=config_sort_task_train_data["data_dirs"], 
+                                               data_dir=list(config_sort_task_train_data["data"].values()), 
                                                data_subdir='train',
-                                               max_samples=config_sort_task_train_data["max_train_samples"],
+                                               max_samples=config_sort_task_train_data["max_samples"]["train"],
                                                maxout=FLAGS.maxout,
                                                read_seed=FLAGS.read_seed,
                                                ngpus=FLAGS.ngpus, 
@@ -1508,30 +1510,33 @@ def run_lesion():
     print('Randomize Classes:', FLAGS.randomize_classes)
     
     if FLAGS.randomize_classes:
+        assert(config_sort_task_train_data["data_space"]["num_tasks"] > 1), "Not enough tasks!"
         print('----- run randomize_classes -----')
-        with open(FLAGS.config_file) as f:
-            config_sort_task_train_data = json.load(f)
+        with open(FLAGS.config_file, 'r') as f:
+            config_sort_task_train_data = yaml.load(f, Loader=yaml.FullLoader)
         #config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
-        max_train_samples = copy.deepcopy(config_sort_task_train_data["max_train_samples"])
+        max_train_samples = copy.deepcopy(config_sort_task_train_data["max_samples"]["train"])
         max_train_samples[sort_task] = 0
         validator_nonsort_task_train_data = Validator(name='nonsort_task_train_data', 
-                                                          model=model, 
-                                                          batch_size=FLAGS.batch_size,
-                                                          data_dir=config_sort_task_train_data["data_dirs"], 
-                                                          data_subdir='train',
-                                                          max_samples=max_train_samples,
-                                                          maxout=FLAGS.maxout,
-                                                          read_seed=FLAGS.read_seed,
-                                                          ngpus=FLAGS.ngpus, 
-                                                          shuffle=FLAGS.shuffle,
-                                                          includePaths=True,
-                                                          workers=FLAGS.workers)
+                                                      model=model, 
+                                                      batch_size=FLAGS.batch_size,
+                                                      data_dir=list(config_sort_task_train_data["data"].values()), 
+                                                      data_subdir='train',
+                                                      max_samples=max_train_samples,
+                                                      maxout=FLAGS.maxout,
+                                                      read_seed=FLAGS.read_seed,
+                                                      ngpus=FLAGS.ngpus, 
+                                                      shuffle=FLAGS.shuffle,
+                                                      includePaths=True,
+                                                      workers=FLAGS.workers)
         
         randomize_classes(sort_task_index        =FLAGS.sort_task_index, 
                           seed                   =FLAGS.randomize_classes_seed, 
                           validator_sort_task    =validator_sort_task_train_data, 
                           validator_nonsort_task =validator_nonsort_task_train_data)
         del validator_nonsort_task_train_data
+        task_to_sort_by = 'randomizedClasses_task_' \
+        + str(FLAGS.sort_task_index) + '_seed_' + str(FLAGS.randomize_classes_seed)
         
     # print arguments
     # --------------------------
@@ -1548,10 +1553,9 @@ def run_lesion():
     #                      mode='train', 
     #                      FLAGS=FLAGS)
     
-    task_to_sort_by = sort_task
-    if FLAGS.randomize_classes:
-        task_to_sort_by = 'randomizedClasses_task_' \
-        + str(FLAGS.sort_task_index) + '_seed_' + str(FLAGS.randomize_classes_seed)
+    
+
+        
     
     
     # Save File (HDF5)
