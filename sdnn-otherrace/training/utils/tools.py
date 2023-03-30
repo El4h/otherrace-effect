@@ -80,6 +80,7 @@ def get_num_classes(data_dir, islist=False):
         classes = []
         for i in range(len(data_dir)):
             dir = os.path.join(data_dir[i], 'train')
+            print(f"dir: {dir}")
             classes.extend([os.path.abspath(d) for d in os.scandir(dir) if d.is_dir()])
         num_classes = len(classes)
     else:
@@ -87,6 +88,21 @@ def get_num_classes(data_dir, islist=False):
         num_classes = len([x for x in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, x))])
 
     return num_classes
+# def get_num_classes(data_dir, islist=False):
+#     data_dir = list(data_dir.items())
+#     num_classes = []
+#     if islist:
+#         for i in range(len(data_dir)):
+#             dir_path = data_dir[i][1]
+#             classes = next(os.walk(os.path.join(dir_path, 'train')))[1]
+#             num_classes.append(len(classes))
+#     else:
+#        for key, value in data_dir.items():
+#             classes = next(os.walk(os.path.join(value, 'train')))[1]
+#             num_classes.append(len(classes))
+            
+#     return num_classes
+
 
 def find_classes(dir):
     classes = os.listdir(dir)

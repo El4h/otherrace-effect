@@ -5,6 +5,13 @@ import os
 import glob
 import numpy as np
 import copy
+import sys
+sys.path.append('/home/elaheh_akbari/new/')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
+
 from utils import helper
 from sklearn import metrics
 import tqdm
@@ -12,7 +19,9 @@ import torch
 import torchvision
 import numpy as np
 import copy
+# import costum moduls
 from utils import helper
+
 import scipy
 import h5py
 import argparse
@@ -660,10 +669,12 @@ def get_drop_loss(selected_units, candidate_unit, validator, weight, bias, cache
     # drop units 
     # -------------------------
     drop_units = np.append(selected_units,candidate_unit)
+    new_weight = weight.clone()
+    new_bias = bias.clone()
     for unit in drop_units:
-        weight[unit] = 0.0
+        new_weight[unit] = 0.0
         if bias is not None:
-            bias[unit]   = 0.0
+            new_bias[unit]   = 0.0
         
     # get loss on prediction
     # -------------------------
@@ -679,9 +690,9 @@ def get_drop_loss(selected_units, candidate_unit, validator, weight, bias, cache
     # replace unit 
     # -------------------------
     for unit in drop_units:
-        weight[unit] = torch.from_numpy(cache['W'][unit])
+        new_weight[unit] = torch.from_numpy(cache['W'][unit])
         if bias is not None:
-            bias[unit]   = torch.from_numpy(cache['b'][unit]) 
+            new_bias[unit]   = torch.from_numpy(cache['b'][unit]) 
     
     return loss
 

@@ -1,13 +1,14 @@
 import os
 import torch
 import torch.utils.data as data
-
+import six
 
 class VisionDataset(data.Dataset):
     _repr_indent = 4
 
     def __init__(self, root, transforms=None, transform=None, target_transform=None):
-        if isinstance(root, torch._six.string_classes):
+        # if isinstance(root, torch._six.string_classes):
+        if isinstance(root, str):
             root = os.path.expanduser(root)
         self.root = root
 
