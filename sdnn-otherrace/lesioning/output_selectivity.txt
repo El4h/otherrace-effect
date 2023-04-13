@@ -1,0 +1,491 @@
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+Restored from: ../../../../../raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian/epoch_261.pth.tar
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+
+read_seed: 0
+
+Frequency of classes:
+[[1654 1655 1656 ... 3305 3306 3307]
+ [  58   58   58 ...   58   58   58]]
+
+False
+
+---CONFIGURATION---
+------------------------
+config.name                   : face_otherrace_white_asian
+config.description            : Training VGG on VGGFace using white and asian dataset
+config.model_type             : VGG16
+config.num_classes            : 3308
+config.split                  : False
+config.batch_size             : 128
+config.optimizer              : sgd
+config.momentum               : 0.9
+config.learning_rate          : 0.001
+config.weight_decay           : 0.0001
+config.data_dir               : [
+                              : /raid/shared/datasets/visoin/data_face_white/data_facecar_na
+                              : /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched
+                              : ]
+config.checkpoints_dir        : /raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian
+config.log_dir                : /raid/elaheh_akbari/face_otherrace_white_asian/runs/vgg/face_otherrace_white_asian
+config.max_train_samples      : {'data_facecar_na': 58, 'data_AFD_matched': 58}
+config.max_valid_samples      : {'data_facecar_na': 5, 'data_AFD_matched': 5}
+------------------------
+
+
+--------MODEL-----------
+------------------------
+DataParallel(
+  (module): VGG(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU(inplace=True)
+      (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU(inplace=True)
+      (4): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (5): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (6): ReLU(inplace=True)
+      (7): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (8): ReLU(inplace=True)
+      (9): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (10): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (11): ReLU(inplace=True)
+      (12): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (13): ReLU(inplace=True)
+      (14): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (15): ReLU(inplace=True)
+      (16): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (17): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (18): ReLU(inplace=True)
+      (19): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (20): ReLU(inplace=True)
+      (21): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (22): ReLU(inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (24): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (25): ReLU(inplace=True)
+      (26): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (27): ReLU(inplace=True)
+      (28): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (29): ReLU(inplace=True)
+      (30): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (classifier): Sequential(
+      (0): Linear(in_features=25088, out_features=4096, bias=True)
+      (1): ReLU(inplace=True)
+      (2): Dropout(p=0.5, inplace=False)
+      (3): Linear(in_features=4096, out_features=4096, bias=True)
+      (4): ReLU(inplace=True)
+      (5): Dropout(p=0.5, inplace=False)
+      (6): Linear(in_features=4096, out_features=3308, bias=True)
+    )
+  )
+)
+------------------------
+
+
+---------------FLAGS------------------
+--------------------------------------
+config_file                             : ./configs/vgg/face_dual_whitasia.yaml
+param_group_index                       : 0
+greedy_p                                : 0.25
+group_p                                 : 0.016
+shuffle                                 : False
+random                                  : False
+ngpus                                   : 1
+batch_size                              : 128
+max_batches                             : 50
+workers                                 : 1
+sort_task_index                         : 1
+nonsort_task_index                      : 0
+restore_epoch                           : -1
+lesion_name                             : selectivity
+read_suffix                             : 
+lesions_dir                             : ./lesions/
+evaluate                                : False
+iterator_seed                           : selection
+read_seed                               : 0
+maxout                                  : True
+randomize_classes                       : False
+randomize_classes_seed                  : 1
+write_predictions                       : False
+subgroups_file                          : None
+--------------------------------------
+
+----------NUMBER OF SAMPLES-----------
+--------------------------------------
+validator.name                          : sort_task_train_data
+
+Samples by torch.dataset:
+-------------------------
+num_steps                               : 750
+~num_samples                            : 96000
+
+Samples by Configuration:
+-------------------------
+data_AFD_matched                        : 0
+--num_classes                           : 1654
+
+data_facecar_na                         : 95932
+--num_classes                           : 1654
+
+total                                   : 95932
+--------------------------------------
+
+-------SAVE FILE--------
+------------------------
+
+Results being saved to: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/lesion.jsonl
+
+
+Record Files:
+
+Selections Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/selections_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0
+
+Progress Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0
+
+Adding to existing jsonlines file...
+
+Starting Greedy Layer Lesion on Train Data
+------------------------------------------
+
+Using Methods:
+greedy_p =  0.25
+Approximation Method: None
+
+validator.name                          : sort_task_train_data
+index                                   : 0
+layer                                   : 0
+layerType                               : <class 'torch.nn.modules.conv.Conv2d'>
+num_units                               : 64
+
+Getting Base Performance...
+(base loss, base accuracy, seed)                : (0.489, 90.328, 703)
+
+
+---------------------------------------------------------------------
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+progress_filename: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0/progress_record_ITER_0.npz
+
+selected_units: []
+
+selected_losses: []
+
+Losses conditioned on 0 selected units w/ seed value=703
+---------------------------------------------------------------------
+(loss, accuracy) @unit 1        : (0.489, 90.328)
+(loss, accuracy) @unit 2        : (0.489, 90.328)
+(loss, accuracy) @unit 3        : (0.489, 90.328)
+
+(loss, accuracy) @unit 4        : (0.489, 90.328)
+
+(loss, accuracy) @unit 5        : (0.489, 90.328)
+
+(loss, accuracy) @unit 6        : (0.489, 90.328)
+
+(loss, accuracy) @unit 7        : (0.489, 90.328)
+
+(loss, accuracy) @unit 8        : (0.489, 90.328)
+
+(loss, accuracy) @unit 9        : (0.489, 90.328)
+
+(loss, accuracy) @unit 10       : (0.489, 90.328)
+
+(loss, accuracy) @unit 11       : (0.489, 90.328)
+
+(loss, accuracy) @unit 12       : (0.489, 90.328)
+
+(loss, accuracy) @unit 13       : (0.489, 90.328)
+
+(loss, accuracy) @unit 14       : (0.489, 90.328)
+
+(loss, accuracy) @unit 15       : (0.489, 90.328)
+
+(loss, accuracy) @unit 16       : (0.489, 90.328)
+
+(loss, accuracy) @unit 17       : (0.489, 90.328)
+
+(loss, accuracy) @unit 18       : (0.489, 90.328)
+
+(loss, accuracy) @unit 19       : (0.489, 90.328)
+
+(loss, accuracy) @unit 20       : (0.489, 90.328)
+
+(loss, accuracy) @unit 21       : (0.489, 90.328)
+
+(loss, accuracy) @unit 22       : (0.489, 90.328)
+
+(loss, accuracy) @unit 23       : (0.489, 90.328)
+
+(loss, accuracy) @unit 24       : (0.489, 90.328)
+
+(loss, accuracy) @unit 25       : (0.489, 90.328)
+
+(loss, accuracy) @unit 26       : (0.489, 90.328)
+
+(loss, accuracy) @unit 27       : (0.489, 90.328)
+
+(loss, accuracy) @unit 28       : (0.489, 90.328)
+
+(loss, accuracy) @unit 29       : (0.489, 90.328)
+
+(loss, accuracy) @unit 30       : (0.489, 90.328)
+
+(loss, accuracy) @unit 31       : (0.489, 90.328)
+
+(loss, accuracy) @unit 32       : (0.489, 90.328)
+
+(loss, accuracy) @unit 33       : (0.489, 90.328)
+
+(loss, accuracy) @unit 34       : (0.489, 90.328)
+
+(loss, accuracy) @unit 35       : (0.489, 90.328)
+
+(loss, accuracy) @unit 36       : (0.489, 90.328)
+
+(loss, accuracy) @unit 37       : (0.489, 90.328)
+
+(loss, accuracy) @unit 38       : (0.489, 90.328)
+
+(loss, accuracy) @unit 39       : (0.489, 90.328)
+
+(loss, accuracy) @unit 40       : (0.489, 90.328)
+
+(loss, accuracy) @unit 41       : (0.489, 90.328)
+
+(loss, accuracy) @unit 42       : (0.489, 90.328)
+
+(loss, accuracy) @unit 43       : (0.489, 90.328)
+
+(loss, accuracy) @unit 44       : (0.489, 90.328)
+
+(loss, accuracy) @unit 45       : (0.489, 90.328)
+
+(loss, accuracy) @unit 46       : (0.489, 90.328)
+
+(loss, accuracy) @unit 47       : (0.489, 90.328)
+
+(loss, accuracy) @unit 48       : (0.489, 90.328)
+
+(loss, accuracy) @unit 49       : (0.489, 90.328)
+
+(loss, accuracy) @unit 50       : (0.489, 90.328)
+
+(loss, accuracy) @unit 51       : (0.489, 90.328)
+
+(loss, accuracy) @unit 52       : (0.489, 90.328)
+
+(loss, accuracy) @unit 53       : (0.489, 90.328)
+
+(loss, accuracy) @unit 54       : (0.489, 90.328)
+
+(loss, accuracy) @unit 55       : (0.489, 90.328)
+
+(loss, accuracy) @unit 56       : (0.489, 90.328)
+
+(loss, accuracy) @unit 57       : (0.489, 90.328)
+
+(loss, accuracy) @unit 58       : (0.489, 90.328)
+
+(loss, accuracy) @unit 59       : (0.489, 90.328)
+
+(loss, accuracy) @unit 60       : (0.489, 90.328)
+
+(loss, accuracy) @unit 61       : (0.489, 90.328)
+
+(loss, accuracy) @unit 62       : (0.489, 90.328)
+
+(loss, accuracy) @unit 63       : (0.489, 90.328)
+
+Unit == None
+\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+--------------------------------------------------------------------
+
+
+1 pending units. Continuing lesion for current iteration.
+--  Found 1 stagnant pending units. Restoring now.
+
+
+---------------------------------------------------------------------
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+progress_filename: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0/progress_record_ITER_0.npz
+
+selected_units: []
+
+selected_losses: []
+
+Losses conditioned on 0 selected units w/ seed value=703
+---------------------------------------------------------------------
+(loss, accuracy) @unit 0        : (0.489, 90.328)
+
+Unit == None
+\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+--------------------------------------------------------------------
+
+conclusion_count: 1
+selection_made: True
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+Restored from: ../../../../../raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian/epoch_261.pth.tar
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+
+read_seed: 0
+
+Frequency of classes:
+[[1654 1655 1656 ... 3305 3306 3307]
+ [  58   58   58 ...   58   58   58]]
+
+False
+
+---CONFIGURATION---
+------------------------
+config.name                   : face_otherrace_white_asian
+config.description            : Training VGG on VGGFace using white and asian dataset
+config.model_type             : VGG16
+config.num_classes            : 3308
+config.split                  : False
+config.batch_size             : 128
+config.optimizer              : sgd
+config.momentum               : 0.9
+config.learning_rate          : 0.001
+config.weight_decay           : 0.0001
+config.data_dir               : [
+                              : /raid/shared/datasets/visoin/data_face_white/data_facecar_na
+                              : /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched
+                              : ]
+config.checkpoints_dir        : /raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian
+config.log_dir                : /raid/elaheh_akbari/face_otherrace_white_asian/runs/vgg/face_otherrace_white_asian
+config.max_train_samples      : {'data_facecar_na': 58, 'data_AFD_matched': 58}
+config.max_valid_samples      : {'data_facecar_na': 5, 'data_AFD_matched': 5}
+------------------------
+
+
+--------MODEL-----------
+------------------------
+DataParallel(
+  (module): VGG(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU(inplace=True)
+      (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU(inplace=True)
+      (4): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (5): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (6): ReLU(inplace=True)
+      (7): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (8): ReLU(inplace=True)
+      (9): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (10): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (11): ReLU(inplace=True)
+      (12): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (13): ReLU(inplace=True)
+      (14): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (15): ReLU(inplace=True)
+      (16): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (17): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (18): ReLU(inplace=True)
+      (19): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (20): ReLU(inplace=True)
+      (21): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (22): ReLU(inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (24): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (25): ReLU(inplace=True)
+      (26): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (27): ReLU(inplace=True)
+      (28): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (29): ReLU(inplace=True)
+      (30): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (classifier): Sequential(
+      (0): Linear(in_features=25088, out_features=4096, bias=True)
+      (1): ReLU(inplace=True)
+      (2): Dropout(p=0.5, inplace=False)
+      (3): Linear(in_features=4096, out_features=4096, bias=True)
+      (4): ReLU(inplace=True)
+      (5): Dropout(p=0.5, inplace=False)
+      (6): Linear(in_features=4096, out_features=3308, bias=True)
+    )
+  )
+)
+------------------------
+
+
+---------------FLAGS------------------
+--------------------------------------
+config_file                             : ./configs/vgg/face_dual_whitasia.yaml
+param_group_index                       : 0
+greedy_p                                : 0.25
+group_p                                 : 0.016
+shuffle                                 : False
+random                                  : False
+ngpus                                   : 1
+batch_size                              : 128
+max_batches                             : 50
+workers                                 : 1
+sort_task_index                         : 1
+nonsort_task_index                      : 0
+restore_epoch                           : -1
+lesion_name                             : selectivity
+read_suffix                             : 
+lesions_dir                             : ./lesions/
+evaluate                                : False
+iterator_seed                           : selection
+read_seed                               : 0
+maxout                                  : True
+randomize_classes                       : False
+randomize_classes_seed                  : 1
+write_predictions                       : False
+subgroups_file                          : None
+--------------------------------------
+
+----------NUMBER OF SAMPLES-----------
+--------------------------------------
+validator.name                          : sort_task_train_data
+
+Samples by torch.dataset:
+-------------------------
+num_steps                               : 750
+~num_samples                            : 96000
+
+Samples by Configuration:
+-------------------------
+data_AFD_matched                        : 0
+--num_classes                           : 1654
+
+data_facecar_na                         : 95932
+--num_classes                           : 1654
+
+total                                   : 95932
+--------------------------------------
+
+-------SAVE FILE--------
+------------------------
+
+Results being saved to: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/lesion.jsonl
+
+
+Record Files:
+
+Selections Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/selections_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0
+
+Progress Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_selectivity/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_0
+
+Adding to existing jsonlines file...
+
+Starting Greedy Layer Lesion on Train Data
+------------------------------------------
+
+Using Methods:
+greedy_p =  0.25
+Approximation Method: None
+
+validator.name                          : sort_task_train_data
+index                                   : 0
+layer                                   : 0
+layerType                               : <class 'torch.nn.modules.conv.Conv2d'>
+num_units                               : 64
+

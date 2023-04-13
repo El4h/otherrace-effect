@@ -1,4 +1,11 @@
 # imports
+import sys
+sys.path.append('/home/elaheh_akbari/new/')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
+
 import os
 import glob
 import numpy as np
@@ -8,10 +15,9 @@ from sklearn import metrics
 import tqdm
 import torch
 import torchvision
-import torchvision.models as models
 import numpy as np
 import copy
-import utils
+# from utils import helper
 import scipy
 import h5py
 import argparse
@@ -22,218 +28,10 @@ from zipfile import BadZipFile
 from filelock import Timeout
 from filelock import SoftFileLock as FileLock
 import random
-import pprint
-import yaml
-
-pp = pprint.PrettyPrinter(indent=1)
+import lesion
 lock_timeout = 30*2
 acquire_timeout = 30*2
 fixed_seed_value = 0
-
-IMAGE_RESIZE=256
-IMAGE_SIZE=224
-GRAYSCALE_PROBABILITY=0.2
-resize_transform      = torchvision.transforms.Resize(IMAGE_RESIZE)
-random_crop_transform = torchvision.transforms.RandomCrop(IMAGE_SIZE)
-center_crop_transform = torchvision.transforms.CenterCrop(IMAGE_SIZE)
-grayscale_transform   = torchvision.transforms.RandomGrayscale(p=GRAYSCALE_PROBABILITY)
-normalize             = torchvision.transforms.Normalize(mean=[0.5]*3,std=[0.5]*3)
-
-class Validator(object):
-    def __init__(self, name, model, batch_size, data_dir, ngpus, workers, 
-                 max_samples=None, maxout=True, read_seed=None, 
-                 shuffle=False, data_subdir='test', includePaths=False):
-        self.name = name
-        self.model = model
-        self.max_samples = max_samples
-        self.maxout=maxout
-        self.read_seed=read_seed
-        self.data_dir = data_dir
-        self.data_subdir = data_subdir
-        self.ngpus = ngpus
-        self.batch_size = batch_size
-        self.workers = workers
-        self.shuffle = shuffle
-        self.includePaths = includePaths
-        self.dataset, self.data_loader = self.data()
-        self.criterion = torch.nn.CrossEntropyLoss()
-        
-        if self.ngpus > 0:
-            self.criterion = self.criterion.cuda()
- 
-    def data(self):
-        if type(self.data_dir) is list:
-            ImageFolder = utils.folder_list.ImageFolder
-            test_data_dir = []
-            for i in range(len(self.data_dir)):
-                test_data_dir.append(os.path.join(self.data_dir[i], self.data_subdir))
-        else:
-            ImageFolder = utils.folder.ImageFolder
-            test_data_dir = os.path.join(self.data_dir, self.data_subdir)
-        
-
-        transform = torchvision.transforms.Compose([resize_transform, 
-                                                    center_crop_transform, 
-                                                    torchvision.transforms.ToTensor(),
-                                                    normalize,
-                                                   ])     
-        
-        dataset = ImageFolder(root=test_data_dir, 
-                              max_samples=self.max_samples,
-                              maxout=self.maxout,
-                              read_seed=self.read_seed,
-                              transform=transform,
-                              includePaths=self.includePaths)
-
-        data_loader = torch.utils.data.DataLoader(dataset=dataset,
-                                                  batch_size=self.batch_size,
-                                                  shuffle=self.shuffle,
-                                                  num_workers=self.workers,
-                                                  pin_memory=True)
-        return dataset, data_loader
-    
-    def __call__(self, x, y):
-        if self.ngpus > 0:
-            y = y.cuda(non_blocking=True)
-            x = x.cuda(non_blocking=True)
-        output = self.model(x=x)
-        prec_1, prec_5 = precision(output=output, target=y, topk=(1,5))
-        prec_1 /= len(output)
-        prec_5 /= len(output)
-        loss = self.criterion(output,y)
-        return loss.item(), prec_1, prec_5, output
-
-def get_model(config, ngpus, dataParallel=False, pretrained=False, epoch=-1):
- 
-    model_names = sorted(name for name in models.__dict__
-        if name.islower() and not name.startswith("__")
-        and callable(models.__dict__[name]))
-    
-    num_classes = utils.tools.get_num_classes(list(config["data"].values()), islist=True)
-    model = models.__dict__[config["architecture"]["model"]](num_classes=num_classes)
-    print("Initialized model with", config["architecture"]["model"], "architecture.")
-    
-    if dataParallel:
-        print('\nApplying DataParallel...')
-        model = torch.nn.DataParallel(model)
-    if ngpus > 0:
-        print('Loading model onto gpu...')
-        model = model.cuda()
-    
-    if pretrained:
-        pretrained_path = utils.tools.get_checkpoint(
-            epoch=epoch,
-            checkpoints_dir=os.path.join(config["save_directories"]["checkpoints_dir"],config["project"]["name"])
-        )
-        if ngpus > 0:
-            ckpt_data = torch.load(pretrained_path) #torch.load(pretrained_path)  
-        else:
-            ckpt_data = torch.load(pretrained_path, map_location=torch.device('cpu'))
-        print(list(ckpt_data.keys()))
-        model.load_state_dict(ckpt_data['state_dict']) # 'model_state_dict'
-        print('\nLoaded pretrained model from:', pretrained_path)
-    return model
-
-def load_record(filename):
-    '''
-    Description:
-        Since npz file are ovewritten by several jobs at similar times may run into 
-        corrupted files by opening at the same time resulting in an error. By using a while try
-        loop you can avoid this until the coast is clear to load. 
-    Input:
-        filename: filename with extension .npz
-    Return:
-        record: an npz record. To see contents try record.files
-    '''
-    file_not_loaded=True
-    attempts=1
-    while file_not_loaded:
-        try:
-            record=np.load(filename, allow_pickle=True)
-            file_not_loaded=False
-        except:
-            print('\nWHILE LOADING FILE: Failed Attempt', attempts, '.\n', flush=True)
-            #time.sleep(5)
-            attempts+=1
-    return record
-
-def get_latest_npz_filename(dir):
-    '''
-    Description:
-        Returns the latest file in the directory dir
-    '''
-    list_of_files = glob.glob(os.path.join(dir, '*.npz')) 
-    try:
-        latest_file = max(list_of_files, key=os.path.getctime)
-    except:
-        latest_file = None
-    return latest_file
-
-def conclude_lesion_to_json(filename, sort_task, param_group_index):
-    key = os.path.join('status','SORTEDBY_' + sort_task, str(param_group_index))
-    lesion_data = get_lesion_data(filename)
-    if key not in lesion_data.keys():
-        count=1
-        write_to_json(filename=filename, writer_method='a', keys=[key], values=['complete'])
-    elif lesion_data[key]=='complete':
-        count=2
-    return count
-
-def write_to_json(filename, writer_method, keys, values):
-    num_keys = len(keys)
-    assert(num_keys == len(values)), 'keys and values must have equal lengths'
-    
-    lockname = filename + '.lock'
-    lock = FileLock(lockname, timeout=lock_timeout)
-    lock.acquire(timeout=acquire_timeout)
-    try:
-        with open(filename, writer_method) as outfile:
-            for i in range(num_keys):
-                key = keys[i]
-                value = values[i]
-                json.dump({key : value}, outfile)
-                outfile.write('\n')
-    finally:
-        lock.release()
-        
-def get_lesion_data(filename):
-    '''Description:
-            returns a dictionary of all json objects in the specificed jsonlines file
-            object occuring more than once with same key will appear uniquely in returned dictionary 
-            with the last json object overwriting previous json objects of the same key
-        Returns:
-            lesion_data: python dciionary
-    '''
-    lockname = filename + '.lock'
-    lock = FileLock(lockname, timeout=lock_timeout)
-    lock.acquire(timeout=acquire_timeout)
-    try:
-        lesion_data = {}
-        with jsonl.open(filename) as reader:
-            for obj in reader:
-                key = list(obj.keys())[0]
-                lesion_data[key]=obj[key]
-    finally:
-        lock.release()
-    return lesion_data
-        
-def json_completion_status(filename, sort_task, param_group_index):
-    '''
-    Description: 
-        True is status for group_index lesion is complete, False otherwise
-    Returns:
-        is_complete - boolean
-    '''
-    lesion_data = get_lesion_data(filename)
-    
-    key = os.path.join('status', 'SORTEDBY_' + sort_task, str(param_group_index))
-    value='not submitted'
-    if key in lesion_data:
-        value = lesion_data[key]
-    is_complete=False
-    if value == 'complete':
-        is_complete=True
-    return is_complete
 
 def get_predictions(pred_file, pred_key):
     with open(pred_file) as f:
@@ -253,62 +51,6 @@ def write_obj2jsonl(filename, writer_method, key, obj):
             outfile.write('\n')
     finally:
         lock.release()
-        
-def randomize_classes(sort_task_index, seed, validator_sort_task, validator_nonsort_task=None):
-    '''
-    Description: randomly reassigns (swaps) half the classes (and data) of each validator to the other
-    '''
-    
-    print('\nRandomizing Classes', flush=True)
-    
-    num_classes = np.sum(list(validator_sort_task.dataset.task_to_num_classes.values()))
-    
-    # random classes for task1
-    np.random.seed(seed=seed)
-    random_classes_task1 = np.random.choice(a=np.arange(num_classes), size=num_classes//2, replace=False, p=None)
-    random_classes_task1 = np.sort(random_classes_task1)
-
-    # random classes for task2 
-    random_classes_task2 = [i for i in range(num_classes) if i not in random_classes_task1]   
-    random_classes_task2 = np.array(random_classes_task2)
-    
-    # assign classes by sort and nonsort task
-    if sort_task_index==0:
-        random_classes_sort_task = random_classes_task1
-        random_classes_nonsort_task = random_classes_task2
-    else:
-        random_classes_sort_task = random_classes_task2
-        random_classes_nonsort_task = random_classes_task1
-        
-    # now gather samples for sort_task
-    random_samples_sort_task = []
-    for sample in validator_sort_task.dataset.samples:
-        if sample[1] in random_classes_sort_task:
-            random_samples_sort_task.append(sample)
-    for sample in validator_nonsort_task.dataset.samples:
-        if sample[1] in random_classes_sort_task:
-            random_samples_sort_task.append(sample) 
-              
-    # now gather samples for nonsort_task
-    random_samples_nonsort_task = []
-    for sample in validator_sort_task.dataset.samples:
-        if sample[1] in random_classes_nonsort_task:
-            random_samples_nonsort_task.append(sample)
-    for sample in validator_nonsort_task.dataset.samples:
-        if sample[1] in random_classes_nonsort_task:
-            random_samples_nonsort_task.append(sample)  
-     
-    # now modify/update the validators
-    validator_sort_task.dataset.samples = random_samples_sort_task
-    validator_nonsort_task.dataset.samples = random_samples_nonsort_task
-    
-    print('\nvalidator_sort_task:')
-    print(validator_sort_task.dataset.samples[0])
-    print(validator_sort_task.dataset.samples[-1])
-    
-    print('\nvalidator_nonsort_task:')
-    print(validator_nonsort_task.dataset.samples[0])
-    print(validator_nonsort_task.dataset.samples[-1])
 
 def generate_unit(filename, num_units, progress_dir, next_iter=False, overwrite=False, iteration=0):
     '''
@@ -359,7 +101,7 @@ def generate_unit(filename, num_units, progress_dir, next_iter=False, overwrite=
         lock = FileLock(lockname, timeout=lock_timeout)
         lock.acquire(timeout=acquire_timeout)
         try:
-            progress_record     = load_record(filename)
+            progress_record     = lesion.load_record(filename)
             selected_units      = progress_record['selected_units']
             selected_losses     = progress_record['selected_losses']
             selected_accuracies = progress_record['selected_accuracies']
@@ -525,7 +267,7 @@ def update_progress(filename, unit, loss, accuracy, subperformances):
     try:
 
         # load data
-        progress_record     = load_record(filename)
+        progress_record     = lesion.load_record(filename)
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -601,7 +343,7 @@ def conclude_progress(filename):
     try:
     
         # load data
-        progress_record     = load_record(filename)
+        progress_record     = lesion.load_record(filename)
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -670,7 +412,7 @@ def restore_stagnant_pending_units(filename, duration_threshold=60):
     lock = FileLock(lockname, timeout=lock_timeout)
     lock.acquire(timeout=acquire_timeout)
     try:
-        progress_record     = load_record(filename)
+        progress_record     = lesion.load_record(filename)
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -735,7 +477,7 @@ def get_progress(filename):
     lock.acquire(timeout=acquire_timeout)
     try:  
         # load progress record
-        progress_record  = load_record(filename)
+        progress_record  = lesion.load_record(filename)
         remaining_units  = progress_record['remaining_units']
         pending_units    = progress_record['pending_units']
         dropped_units    = progress_record['dropped_units']
@@ -764,7 +506,7 @@ def get_selections(filename):
         lock.acquire(timeout=acquire_timeout)
         try:
             # load progress record
-            progress_record     = load_record(filename)
+            progress_record     = lesion.load_record(filename)
             selected_units      = progress_record['selected_units']
             selected_losses     = progress_record['selected_losses']
             selected_accuracies = progress_record['selected_accuracies']
@@ -785,7 +527,7 @@ def update_selections(filename, new_selected_units, new_selected_losses, new_sel
     lock = FileLock(lockname, timeout=lock_timeout)
     lock.acquire(timeout=acquire_timeout)
     try:
-        progress_record     = load_record(filename)
+        progress_record     = lesion.load_record(filename)
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -855,7 +597,7 @@ def conclude_selections(progress_filename, selections_dir):
     progress_lock = FileLock(progress_lockname, timeout=lock_timeout)
     progress_lock.acquire(timeout=acquire_timeout)
     try:
-        progress_record     = load_record(progress_filename)
+        progress_record     = lesion.load_record(progress_filename)
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -918,14 +660,15 @@ def conclude_selections(progress_filename, selections_dir):
 
 def get_drop_loss(selected_units, candidate_units, validator, weight, bias, cache, ngpus, max_batches, 
                   seed, subgroups_file=None):
-    
     # drop units 
     # -------------------------
     drop_units = np.append(selected_units,candidate_units)
+    new_weight = weight.clone()
+    new_bias = bias.clone()
     for unit in drop_units:
-        weight[unit] = 0.0
+        new_weight[unit] = 0.0
         if bias is not None:
-            bias[unit]   = 0.0
+            new_bias[unit]   = 0.0
         
     # get loss on prediction
     # -------------------------
@@ -948,9 +691,9 @@ def get_drop_loss(selected_units, candidate_units, validator, weight, bias, cach
     # replace unit 
     # -------------------------
     for unit in drop_units:
-        weight[unit] = torch.from_numpy(cache['W'][unit])
+        new_weight[unit] = torch.from_numpy(cache['W'][unit])
         if bias is not None:
-            bias[unit]   = torch.from_numpy(cache['b'][unit]) 
+            new_bias[unit]   = torch.from_numpy(cache['b'][unit]) 
     
     y_pred = np.squeeze(y_pred)
     accuracy = metrics.accuracy_score(y_true=y_true, y_pred=y_pred)
@@ -997,7 +740,7 @@ def restore_missing_units(num_units, progress_filename, restore=False):
     progress_lock.acquire(timeout=acquire_timeout)
     try:
         # progress
-        progress_record     = load_record(filename=progress_filename)   
+        progress_record     = lesion.load_record(filename=progress_filename)   
         selected_units      = progress_record['selected_units']
         selected_losses     = progress_record['selected_losses']
         selected_accuracies = progress_record['selected_accuracies']
@@ -1143,7 +886,7 @@ def greedy_lesion_layer(validator,index,layerMap,selections_dir,progress_dir,pre
     # run until have reached the num_units required to select (if greedy_p=0 a break statement will occur)
     # ---------------------------------------------------------------------------------------------------
     
-    progress_filename = get_latest_npz_filename(dir=progress_dir)
+    progress_filename = lesion.get_latest_npz_filename(dir=progress_dir)
     selections = get_selections(filename=progress_filename)
     selected_units, selected_losses, selected_accuracies, selected_subperformances, _ = selections  # if none returns empty arrays
     
@@ -1152,7 +895,7 @@ def greedy_lesion_layer(validator,index,layerMap,selections_dir,progress_dir,pre
     linear_complete=False
     greedy_complete=False
     while (selected_units.shape[0] <= num_units_to_drop):  
-        progress_filename = get_latest_npz_filename(dir=progress_dir)
+        progress_filename = lesion.get_latest_npz_filename(dir=progress_dir)
         selections = get_selections(filename=progress_filename)
         selected_units, selected_losses, selected_accuracies, selected_subperformances, _ = selections
         notNone_unit_count  = 0
@@ -1420,9 +1163,9 @@ def run_lesion():
     parser.add_argument('--ngpus',                default=1,            type=int,   help='number of gpus to use')
     parser.add_argument('--batch_size',           default=128,          type=int,   help='batch size')
     parser.add_argument('--max_batches',          default=5,            type=int,   help='batches to run on train losses')
-    parser.add_argument('--workers',              default=4,            type=int,   help='read and write workers')
-    parser.add_argument('--sort_task_index',      default=0,     choices=[0, 1],    type=int, help='0=first, 1=second')
-    parser.add_argument('--nonsort_task_index',   default=1,     choices=[0, 1, -1],type=int, help='0=first, 1=second')
+    parser.add_argument('--workers',              default=1,            type=int,   help='read and write workers')
+    parser.add_argument('--sort_task_index',      default=0,            type=int,   help='sort_task_index + 1')
+    parser.add_argument('--nonsort_task_index',   default=1,            type=int,   help='nonsort_task_index + 1')
     parser.add_argument('--restore_epoch',        default=-1,           type=int,   help='epoch to restore from')
     parser.add_argument('--lesion_name',          default='',           type=str,   help='save suffix identifier')
     parser.add_argument('--read_suffix',          default='',           type=str,   help='read suffix identifier')
@@ -1436,6 +1179,7 @@ def run_lesion():
     parser.add_argument('--write_predictions',    default="False",     type=str, help='write y_true and y_pred for lesions')
     parser.add_argument('--subgroups_file',       default=None, type=str, help='array file for categ2subgroup')
     
+    
     FLAGS, FIRE_FLAGS = parser.parse_known_args()
     
     # converts strings to corresponding boolean values
@@ -1446,40 +1190,20 @@ def run_lesion():
     FLAGS.randomize_classes = True if (FLAGS.randomize_classes == 'True') else False
     FLAGS.write_predictions = True if (FLAGS.write_predictions == 'True') else False
     
-    print(FLAGS)
-    print(flush=True)
-    
     if FLAGS.ngpus > 0:
         torch.backends.cudnn.benchmark = True
               
     # Get Model and tasks
     # --------------------------
-    #config = helper.Config(config_file=FLAGS.config_file)
-    #model, ckpt_data = config.get_model(pretrained=True, ngpus=FLAGS.ngpus, dataParallel=True, epoch=FLAGS.restore_epoch)
-    
-    # Get Config File
-    with open(FLAGS.config_file) as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-        print("Loaded Config File:\n---------------------------------------")
-        pp.pprint(config)
-        print(flush=True)
-    
-    model = get_model(config=config, ngpus=FLAGS.ngpus, dataParallel=True, pretrained=True)
-    
+    config = helper.Config(config_file=FLAGS.config_file)
+    model, ckpt_data = config.get_model(pretrained=True, ngpus=FLAGS.ngpus, dataParallel=True, epoch=FLAGS.restore_epoch)
     layerMap = helper.getLayerMapping(model)
         
-    config["hyperparameters"]["batch_size"] = FLAGS.batch_size
-    tasks = list(config["max_samples"]["valid"].keys())
-    if config["project"]["num_tasks"] > 1:
-        tasks.sort()
-        sort_task = tasks[FLAGS.sort_task_index]
-        nonsort_task = tasks[FLAGS.nonsort_task_index]
-        print('sort_task:', sort_task)
-        print('nonsort_task:', nonsort_task)
-    else:
-        sort_task = tasks[0]
-        print('sort_task:', sort_task)
-    task_to_sort_by = sort_task
+    config.batch_size = FLAGS.batch_size
+    tasks = list(config.max_valid_samples.keys())
+    tasks.sort()
+    sort_task = tasks[FLAGS.sort_task_index]
+    nonsort_task = tasks[FLAGS.nonsort_task_index]
     
     ###########################################################################
     ###########################################################################
@@ -1489,58 +1213,50 @@ def run_lesion():
     
     # validator sort_task train data
     # --------------------------
-    with open(FLAGS.config_file) as f:
-        config_sort_task_train_data = yaml.load(f, Loader=yaml.FullLoader)
-    #config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
-    if config_sort_task_train_data["project"]["num_tasks"] > 1:
-        config_sort_task_train_data["max_samples"]["train"][nonsort_task] = 0
-    validator_sort_task_train_data = Validator(name='sort_task_train_data', 
-                                               model=model, 
-                                               batch_size=FLAGS.batch_size,
-                                               data_dir=list(config_sort_task_train_data["data"].values()), 
-                                               data_subdir='train',
-                                               max_samples=config_sort_task_train_data["max_samples"]["train"],
-                                               maxout=FLAGS.maxout,
-                                               read_seed=FLAGS.read_seed,
-                                               ngpus=FLAGS.ngpus, 
-                                               shuffle=FLAGS.shuffle,
-                                               includePaths=True,
-                                               workers=FLAGS.workers)
+    config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
+    config_sort_task_train_data.max_train_samples[nonsort_task] = 0
+    validator_sort_task_train_data = helper.Validator(name='sort_task_train_data', 
+                                 model=model, 
+                                 batch_size=FLAGS.batch_size,
+                                 data_dir=config_sort_task_train_data.data_dir, 
+                                 data_subdir='train',
+                                 max_samples=config_sort_task_train_data.max_train_samples,
+                                 maxout=FLAGS.maxout,
+                                 read_seed=FLAGS.read_seed,
+                                 ngpus=FLAGS.ngpus, 
+                                 shuffle=FLAGS.shuffle,
+                                 includePaths=True,
+                                 workers=FLAGS.workers)
     
-    print('Randomize Classes:', FLAGS.randomize_classes)
+    print(FLAGS.randomize_classes)
     
     if FLAGS.randomize_classes:
-        assert(config_sort_task_train_data["data_space"]["num_tasks"] > 1), "Not enough tasks!"
         print('----- run randomize_classes -----')
-        with open(FLAGS.config_file, 'r') as f:
-            config_sort_task_train_data = yaml.load(f, Loader=yaml.FullLoader)
-        #config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
-        max_train_samples = copy.deepcopy(config_sort_task_train_data["max_samples"]["train"])
+        config_sort_task_train_data = helper.Config(config_file=FLAGS.config_file)
+        max_train_samples = copy.deepcopy(config_sort_task_train_data.max_train_samples)
         max_train_samples[sort_task] = 0
-        validator_nonsort_task_train_data = Validator(name='nonsort_task_train_data', 
-                                                      model=model, 
-                                                      batch_size=FLAGS.batch_size,
-                                                      data_dir=list(config_sort_task_train_data["data"].values()), 
-                                                      data_subdir='train',
-                                                      max_samples=max_train_samples,
-                                                      maxout=FLAGS.maxout,
-                                                      read_seed=FLAGS.read_seed,
-                                                      ngpus=FLAGS.ngpus, 
-                                                      shuffle=FLAGS.shuffle,
-                                                      includePaths=True,
-                                                      workers=FLAGS.workers)
+        validator_nonsort_task_train_data = helper.Validator(name='nonsort_task_train_data', 
+                                                          model=model, 
+                                                          batch_size=FLAGS.batch_size,
+                                                          data_dir=config_sort_task_train_data.data_dir, 
+                                                          data_subdir='train',
+                                                          max_samples=max_train_samples,
+                                                          maxout=FLAGS.maxout,
+                                                          read_seed=FLAGS.read_seed,
+                                                          ngpus=FLAGS.ngpus, 
+                                                          shuffle=FLAGS.shuffle,
+                                                          includePaths=True,
+                                                          workers=FLAGS.workers)
         
-        randomize_classes(sort_task_index        =FLAGS.sort_task_index, 
-                          seed                   =FLAGS.randomize_classes_seed, 
-                          validator_sort_task    =validator_sort_task_train_data, 
-                          validator_nonsort_task =validator_nonsort_task_train_data)
+        lesion.randomize_classes(sort_task_index        =FLAGS.sort_task_index, 
+                                 seed                   =FLAGS.randomize_classes_seed, 
+                                 validator_sort_task    =validator_sort_task_train_data, 
+                                 validator_nonsort_task =validator_nonsort_task_train_data)
         del validator_nonsort_task_train_data
-        task_to_sort_by = 'randomizedClasses_task_' \
-        + str(FLAGS.sort_task_index) + '_seed_' + str(FLAGS.randomize_classes_seed)
         
     # print arguments
     # --------------------------
-    #config.printAttributes()
+    config.printAttributes()
     print(flush=True)
     print('--------MODEL-----------',flush=True)
     print('------------------------',flush=True)
@@ -1548,14 +1264,15 @@ def run_lesion():
     print('------------------------',flush=True)
     print(flush=True)
     
-    #helper.printArguments(config=config_sort_task_train_data, 
-    #                      validator=validator_sort_task_train_data, 
-    #                      mode='train', 
-    #                      FLAGS=FLAGS)
+    helper.printArguments(config=config_sort_task_train_data, 
+                          validator=validator_sort_task_train_data, 
+                          mode='train', 
+                          FLAGS=FLAGS)
     
-    
-
-        
+    task_to_sort_by = sort_task
+    if FLAGS.randomize_classes:
+        task_to_sort_by = 'randomizedClasses_task_' \
+        + str(FLAGS.sort_task_index) + '_seed_' + str(FLAGS.randomize_classes_seed)
     
     
     # Save File (HDF5)
@@ -1578,7 +1295,7 @@ def run_lesion():
     
     # NEW DIR STRUCTURE
     network_dir = os.path.basename(os.path.dirname(FLAGS.config_file))
-    lesions_dir = os.path.join(FLAGS.lesions_dir, network_dir, os.path.basename(FLAGS.config_file)[:-5])
+    lesions_dir = os.path.join(FLAGS.lesions_dir, network_dir, config.name)
     records_dir=os.path.join(lesions_dir, 'LESION_NAME_'+ FLAGS.lesion_name)
     lesions_filename = os.path.join(records_dir, 'lesion.jsonl')
     selections_dir=os.path.join(records_dir,
@@ -1611,7 +1328,7 @@ def run_lesion():
 
         keys = ['meta/greedy_p', 'meta/shuffle', 'meta/batch_size', 'meta/max_batches', 'meta/restore_epoch']
         values = [FLAGS.greedy_p, FLAGS.shuffle, FLAGS.batch_size, FLAGS.max_batches, FLAGS.restore_epoch]
-        write_to_json(filename=lesions_filename, writer_method='w', keys=keys, values=values)
+        lesion.write_to_json(filename=lesions_filename, writer_method='w', keys=keys, values=values)
      
     # write predictions
     predictions_filename = None
@@ -1637,7 +1354,7 @@ def run_lesion():
     
         
     # get latest selections
-    progress_filename = get_latest_npz_filename(dir=progress_dir) 
+    progress_filename = lesion.get_latest_npz_filename(dir=progress_dir) 
     selections_complete = get_selections(filename=progress_filename)[4]
     
     if (progress_filename is None) or (selections_complete==False): 
@@ -1660,19 +1377,19 @@ def run_lesion():
 
     # wait for all processes to finish 
     while selections_complete==False: 
-        progress_filename = get_latest_npz_filename(dir=progress_dir)
+        progress_filename = lesion.get_latest_npz_filename(dir=progress_dir)
         selections_complete = get_selections(filename=progress_filename)[4]
         print('\nWaiting on other jobs to complete...', flush=True)
         time.sleep(10)
     
     # search json file for complete status
     # -------------------------
-    status_is_complete = json_completion_status(filename=lesions_filename, 
+    status_is_complete = lesion.json_completion_status(filename=lesions_filename, 
                                                 sort_task=task_to_sort_by, 
                                                 param_group_index=FLAGS.param_group_index)
     
     if (status_is_complete == False):
-        json_conclude_count = conclude_lesion_to_json(filename=lesions_filename, 
+        json_conclude_count = lesion.conclude_lesion_to_json(filename=lesions_filename, 
                                                       sort_task=task_to_sort_by, 
                                                       param_group_index=FLAGS.param_group_index)
         
@@ -1688,7 +1405,7 @@ def run_lesion():
         print(lesions_filename, flush=True)
         keys = []
         values = []
-        progress_filename = get_latest_npz_filename(dir=progress_dir)
+        progress_filename = lesion.get_latest_npz_filename(dir=progress_dir)
         selections = get_selections(filename=progress_filename)
         selected_units, selected_losses, selected_accuracies, selected_subperformances, _ = selections
         
@@ -1709,7 +1426,7 @@ def run_lesion():
             keys.append(group)
             values.append(selected_subperformances.tolist())
         
-        write_to_json(filename=lesions_filename, writer_method='a', keys=keys, values=values)
+        lesion.write_to_json(filename=lesions_filename, writer_method='a', keys=keys, values=values)
             
     print('---Lesion complete for current index!', flush=True)
     

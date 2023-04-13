@@ -1,0 +1,1206 @@
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+Restored from: ../../../../../raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian/epoch_261.pth.tar
+dir: /raid/shared/datasets/visoin/data_face_white/data_facecar_na/train
+dir: /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched/train
+
+read_seed: 0
+
+Frequency of classes:
+[[1654 1655 1656 ... 3305 3306 3307]
+ [  58   58   58 ...   58   58   58]]
+
+False
+
+---CONFIGURATION---
+------------------------
+config.name                   : face_otherrace_white_asian
+config.description            : Training VGG on VGGFace using white and asian dataset
+config.model_type             : VGG16
+config.num_classes            : 3308
+config.split                  : False
+config.batch_size             : 128
+config.optimizer              : sgd
+config.momentum               : 0.9
+config.learning_rate          : 0.001
+config.weight_decay           : 0.0001
+config.data_dir               : [
+                              : /raid/shared/datasets/visoin/data_face_white/data_facecar_na
+                              : /raid/shared/datasets/visoin/data_face_asian/data_AFD_matched
+                              : ]
+config.checkpoints_dir        : /raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/face_otherrace_white_asian
+config.log_dir                : /raid/elaheh_akbari/face_otherrace_white_asian/runs/vgg/face_otherrace_white_asian
+config.max_train_samples      : {'data_facecar_na': 58, 'data_AFD_matched': 58}
+config.max_valid_samples      : {'data_facecar_na': 5, 'data_AFD_matched': 5}
+------------------------
+
+
+--------MODEL-----------
+------------------------
+DataParallel(
+  (module): VGG(
+    (features): Sequential(
+      (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (1): ReLU(inplace=True)
+      (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (3): ReLU(inplace=True)
+      (4): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (5): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (6): ReLU(inplace=True)
+      (7): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (8): ReLU(inplace=True)
+      (9): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (10): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (11): ReLU(inplace=True)
+      (12): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (13): ReLU(inplace=True)
+      (14): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (15): ReLU(inplace=True)
+      (16): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (17): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (18): ReLU(inplace=True)
+      (19): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (20): ReLU(inplace=True)
+      (21): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (22): ReLU(inplace=True)
+      (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (24): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (25): ReLU(inplace=True)
+      (26): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (27): ReLU(inplace=True)
+      (28): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (29): ReLU(inplace=True)
+      (30): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    )
+    (classifier): Sequential(
+      (0): Linear(in_features=25088, out_features=4096, bias=True)
+      (1): ReLU(inplace=True)
+      (2): Dropout(p=0.5, inplace=False)
+      (3): Linear(in_features=4096, out_features=4096, bias=True)
+      (4): ReLU(inplace=True)
+      (5): Dropout(p=0.5, inplace=False)
+      (6): Linear(in_features=4096, out_features=3308, bias=True)
+    )
+  )
+)
+------------------------
+
+
+---------------FLAGS------------------
+--------------------------------------
+config_file                             : ./configs/vgg/face_dual_whitasia.yaml
+param_group_index                       : 12
+greedy_p                                : 0.25
+group_p                                 : 0.016
+shuffle                                 : False
+random                                  : False
+ngpus                                   : 1
+batch_size                              : 128
+max_batches                             : 50
+workers                                 : 1
+sort_task_index                         : 1
+nonsort_task_index                      : 0
+restore_epoch                           : -1
+lesion_name                             : lesionlayer12
+read_suffix                             : 
+lesions_dir                             : ./lesions/
+evaluate                                : False
+iterator_seed                           : selection
+read_seed                               : 0
+maxout                                  : True
+randomize_classes                       : False
+randomize_classes_seed                  : 1
+write_predictions                       : False
+subgroups_file                          : None
+--------------------------------------
+
+----------NUMBER OF SAMPLES-----------
+--------------------------------------
+validator.name                          : sort_task_train_data
+
+Samples by torch.dataset:
+-------------------------
+num_steps                               : 750
+~num_samples                            : 96000
+
+Samples by Configuration:
+-------------------------
+data_AFD_matched                        : 0
+--num_classes                           : 1654
+
+data_facecar_na                         : 95932
+--num_classes                           : 1654
+
+total                                   : 95932
+--------------------------------------
+
+-------SAVE FILE--------
+------------------------
+
+Results being saved to: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_lesionlayer12/lesion.jsonl
+
+
+Record Files:
+
+Selections Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_lesionlayer12/selections_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_12
+
+Progress Records: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_lesionlayer12/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_12
+
+Creating new jsonlines file...
+
+Starting Greedy Layer Lesion on Train Data
+------------------------------------------
+
+Using Methods:
+greedy_p =  0.25
+Approximation Method: None
+
+validator.name                          : sort_task_train_data
+index                                   : 12
+layer                                   : 28
+layerType                               : <class 'torch.nn.modules.conv.Conv2d'>
+num_units                               : 512
+
+Getting Base Performance...
+(base loss, base accuracy, seed)                : (0.489, 90.328, 380)
+
+
+---------------------------------------------------------------------
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+progress_filename: ./lesions/vgg/face_otherrace_white_asian/LESION_NAME_lesionlayer12/progress_records/SORTEDBY_data_facecar_na/PARAM_GROUP_INDEX_12/progress_record_ITER_0.npz
+
+selected_units: []
+
+selected_losses: []
+
+Losses conditioned on 0 selected units w/ seed value=380
+---------------------------------------------------------------------
+(loss, accuracy) @unit 0        : (0.489, 90.328)
+(loss, accuracy) @unit 1        : (0.489, 90.328)
+(loss, accuracy) @unit 2        : (0.489, 90.328)
+
+(loss, accuracy) @unit 3        : (0.489, 90.328)
+
+(loss, accuracy) @unit 4        : (0.489, 90.328)
+
+(loss, accuracy) @unit 5        : (0.489, 90.328)
+
+(loss, accuracy) @unit 6        : (0.489, 90.328)
+
+(loss, accuracy) @unit 7        : (0.489, 90.328)
+
+(loss, accuracy) @unit 8        : (0.489, 90.328)
+
+(loss, accuracy) @unit 9        : (0.489, 90.328)
+
+(loss, accuracy) @unit 10       : (0.489, 90.328)
+
+(loss, accuracy) @unit 11       : (0.489, 90.328)
+
+(loss, accuracy) @unit 12       : (0.489, 90.328)
+
+(loss, accuracy) @unit 13       : (0.489, 90.328)
+
+(loss, accuracy) @unit 14       : (0.489, 90.328)
+
+(loss, accuracy) @unit 15       : (0.489, 90.328)
+
+(loss, accuracy) @unit 16       : (0.489, 90.328)
+
+(loss, accuracy) @unit 17       : (0.489, 90.328)
+
+(loss, accuracy) @unit 18       : (0.489, 90.328)
+
+(loss, accuracy) @unit 19       : (0.489, 90.328)
+
+(loss, accuracy) @unit 20       : (0.489, 90.328)
+
+(loss, accuracy) @unit 21       : (0.489, 90.328)
+
+(loss, accuracy) @unit 22       : (0.489, 90.328)
+
+(loss, accuracy) @unit 23       : (0.489, 90.328)
+
+(loss, accuracy) @unit 24       : (0.489, 90.328)
+
+(loss, accuracy) @unit 25       : (0.489, 90.328)
+
+(loss, accuracy) @unit 26       : (0.489, 90.328)
+
+(loss, accuracy) @unit 27       : (0.489, 90.328)
+
+(loss, accuracy) @unit 28       : (0.489, 90.328)
+
+(loss, accuracy) @unit 29       : (0.489, 90.328)
+
+(loss, accuracy) @unit 30       : (0.489, 90.328)
+
+(loss, accuracy) @unit 31       : (0.489, 90.328)
+
+(loss, accuracy) @unit 32       : (0.489, 90.328)
+
+(loss, accuracy) @unit 33       : (0.489, 90.328)
+
+(loss, accuracy) @unit 34       : (0.489, 90.328)
+
+(loss, accuracy) @unit 35       : (0.489, 90.328)
+
+(loss, accuracy) @unit 36       : (0.489, 90.328)
+
+(loss, accuracy) @unit 37       : (0.489, 90.328)
+
+(loss, accuracy) @unit 38       : (0.489, 90.328)
+
+(loss, accuracy) @unit 39       : (0.489, 90.328)
+
+(loss, accuracy) @unit 40       : (0.489, 90.328)
+
+(loss, accuracy) @unit 41       : (0.489, 90.328)
+
+(loss, accuracy) @unit 42       : (0.489, 90.328)
+
+(loss, accuracy) @unit 43       : (0.489, 90.328)
+
+(loss, accuracy) @unit 44       : (0.489, 90.328)
+
+(loss, accuracy) @unit 45       : (0.489, 90.328)
+
+(loss, accuracy) @unit 46       : (0.489, 90.328)
+
+(loss, accuracy) @unit 47       : (0.489, 90.328)
+
+(loss, accuracy) @unit 48       : (0.489, 90.328)
+
+(loss, accuracy) @unit 49       : (0.489, 90.328)
+
+(loss, accuracy) @unit 50       : (0.489, 90.328)
+
+(loss, accuracy) @unit 51       : (0.489, 90.328)
+
+(loss, accuracy) @unit 52       : (0.489, 90.328)
+
+(loss, accuracy) @unit 53       : (0.489, 90.328)
+
+(loss, accuracy) @unit 54       : (0.489, 90.328)
+
+(loss, accuracy) @unit 55       : (0.489, 90.328)
+
+(loss, accuracy) @unit 56       : (0.489, 90.328)
+
+(loss, accuracy) @unit 57       : (0.489, 90.328)
+
+(loss, accuracy) @unit 58       : (0.489, 90.328)
+
+(loss, accuracy) @unit 59       : (0.489, 90.328)
+
+(loss, accuracy) @unit 60       : (0.489, 90.328)
+
+(loss, accuracy) @unit 61       : (0.489, 90.328)
+
+(loss, accuracy) @unit 62       : (0.489, 90.328)
+
+(loss, accuracy) @unit 63       : (0.489, 90.328)
+
+(loss, accuracy) @unit 64       : (0.489, 90.328)
+
+(loss, accuracy) @unit 65       : (0.489, 90.328)
+
+(loss, accuracy) @unit 66       : (0.489, 90.328)
+
+(loss, accuracy) @unit 67       : (0.489, 90.328)
+
+(loss, accuracy) @unit 68       : (0.489, 90.328)
+
+(loss, accuracy) @unit 69       : (0.489, 90.328)
+
+(loss, accuracy) @unit 70       : (0.489, 90.328)
+
+(loss, accuracy) @unit 71       : (0.489, 90.328)
+
+(loss, accuracy) @unit 72       : (0.489, 90.328)
+
+(loss, accuracy) @unit 73       : (0.489, 90.328)
+
+(loss, accuracy) @unit 74       : (0.489, 90.328)
+
+(loss, accuracy) @unit 75       : (0.489, 90.328)
+
+(loss, accuracy) @unit 76       : (0.489, 90.328)
+
+(loss, accuracy) @unit 77       : (0.489, 90.328)
+
+(loss, accuracy) @unit 78       : (0.489, 90.328)
+
+(loss, accuracy) @unit 79       : (0.489, 90.328)
+
+(loss, accuracy) @unit 80       : (0.489, 90.328)
+
+(loss, accuracy) @unit 81       : (0.489, 90.328)
+
+(loss, accuracy) @unit 82       : (0.489, 90.328)
+
+(loss, accuracy) @unit 83       : (0.489, 90.328)
+
+(loss, accuracy) @unit 84       : (0.489, 90.328)
+
+(loss, accuracy) @unit 85       : (0.489, 90.328)
+
+(loss, accuracy) @unit 86       : (0.489, 90.328)
+
+(loss, accuracy) @unit 87       : (0.489, 90.328)
+
+(loss, accuracy) @unit 88       : (0.489, 90.328)
+
+(loss, accuracy) @unit 89       : (0.489, 90.328)
+
+(loss, accuracy) @unit 90       : (0.489, 90.328)
+
+(loss, accuracy) @unit 91       : (0.489, 90.328)
+
+(loss, accuracy) @unit 92       : (0.489, 90.328)
+
+(loss, accuracy) @unit 93       : (0.489, 90.328)
+
+(loss, accuracy) @unit 94       : (0.489, 90.328)
+
+(loss, accuracy) @unit 95       : (0.489, 90.328)
+
+(loss, accuracy) @unit 96       : (0.489, 90.328)
+
+(loss, accuracy) @unit 97       : (0.489, 90.328)
+
+(loss, accuracy) @unit 98       : (0.489, 90.328)
+
+(loss, accuracy) @unit 99       : (0.489, 90.328)
+
+(loss, accuracy) @unit 100      : (0.489, 90.328)
+
+(loss, accuracy) @unit 101      : (0.489, 90.328)
+
+(loss, accuracy) @unit 102      : (0.489, 90.328)
+
+(loss, accuracy) @unit 103      : (0.489, 90.328)
+
+(loss, accuracy) @unit 104      : (0.489, 90.328)
+
+(loss, accuracy) @unit 105      : (0.489, 90.328)
+
+(loss, accuracy) @unit 106      : (0.489, 90.328)
+
+(loss, accuracy) @unit 107      : (0.489, 90.328)
+
+(loss, accuracy) @unit 108      : (0.489, 90.328)
+
+(loss, accuracy) @unit 109      : (0.489, 90.328)
+
+(loss, accuracy) @unit 110      : (0.489, 90.328)
+
+(loss, accuracy) @unit 111      : (0.489, 90.328)
+
+(loss, accuracy) @unit 112      : (0.489, 90.328)
+
+(loss, accuracy) @unit 113      : (0.489, 90.328)
+
+(loss, accuracy) @unit 114      : (0.489, 90.328)
+
+(loss, accuracy) @unit 115      : (0.489, 90.328)
+
+(loss, accuracy) @unit 116      : (0.489, 90.328)
+
+(loss, accuracy) @unit 117      : (0.489, 90.328)
+
+(loss, accuracy) @unit 118      : (0.489, 90.328)
+
+(loss, accuracy) @unit 119      : (0.489, 90.328)
+
+(loss, accuracy) @unit 120      : (0.489, 90.328)
+
+(loss, accuracy) @unit 121      : (0.489, 90.328)
+
+(loss, accuracy) @unit 122      : (0.489, 90.328)
+
+(loss, accuracy) @unit 123      : (0.489, 90.328)
+
+(loss, accuracy) @unit 124      : (0.489, 90.328)
+
+(loss, accuracy) @unit 125      : (0.489, 90.328)
+
+(loss, accuracy) @unit 126      : (0.489, 90.328)
+
+(loss, accuracy) @unit 127      : (0.489, 90.328)
+
+(loss, accuracy) @unit 128      : (0.489, 90.328)
+
+(loss, accuracy) @unit 129      : (0.489, 90.328)
+
+(loss, accuracy) @unit 130      : (0.489, 90.328)
+
+(loss, accuracy) @unit 131      : (0.489, 90.328)
+
+(loss, accuracy) @unit 132      : (0.489, 90.328)
+
+(loss, accuracy) @unit 133      : (0.489, 90.328)
+
+(loss, accuracy) @unit 134      : (0.489, 90.328)
+
+(loss, accuracy) @unit 135      : (0.489, 90.328)
+
+(loss, accuracy) @unit 136      : (0.489, 90.328)
+
+(loss, accuracy) @unit 137      : (0.489, 90.328)
+
+(loss, accuracy) @unit 138      : (0.489, 90.328)
+
+(loss, accuracy) @unit 139      : (0.489, 90.328)
+
+(loss, accuracy) @unit 140      : (0.489, 90.328)
+
+(loss, accuracy) @unit 141      : (0.489, 90.328)
+
+(loss, accuracy) @unit 142      : (0.489, 90.328)
+
+(loss, accuracy) @unit 143      : (0.489, 90.328)
+
+(loss, accuracy) @unit 144      : (0.489, 90.328)
+
+(loss, accuracy) @unit 145      : (0.489, 90.328)
+
+(loss, accuracy) @unit 146      : (0.489, 90.328)
+
+(loss, accuracy) @unit 147      : (0.489, 90.328)
+
+(loss, accuracy) @unit 148      : (0.489, 90.328)
+
+(loss, accuracy) @unit 149      : (0.489, 90.328)
+
+(loss, accuracy) @unit 150      : (0.489, 90.328)
+
+(loss, accuracy) @unit 151      : (0.489, 90.328)
+
+(loss, accuracy) @unit 152      : (0.489, 90.328)
+
+(loss, accuracy) @unit 153      : (0.489, 90.328)
+
+(loss, accuracy) @unit 154      : (0.489, 90.328)
+
+(loss, accuracy) @unit 155      : (0.489, 90.328)
+
+(loss, accuracy) @unit 156      : (0.489, 90.328)
+
+(loss, accuracy) @unit 157      : (0.489, 90.328)
+
+(loss, accuracy) @unit 158      : (0.489, 90.328)
+
+(loss, accuracy) @unit 159      : (0.489, 90.328)
+
+(loss, accuracy) @unit 160      : (0.489, 90.328)
+
+(loss, accuracy) @unit 161      : (0.489, 90.328)
+
+(loss, accuracy) @unit 162      : (0.489, 90.328)
+
+(loss, accuracy) @unit 163      : (0.489, 90.328)
+
+(loss, accuracy) @unit 164      : (0.489, 90.328)
+
+(loss, accuracy) @unit 165      : (0.489, 90.328)
+
+(loss, accuracy) @unit 166      : (0.489, 90.328)
+
+(loss, accuracy) @unit 167      : (0.489, 90.328)
+
+(loss, accuracy) @unit 168      : (0.489, 90.328)
+
+(loss, accuracy) @unit 169      : (0.489, 90.328)
+
+(loss, accuracy) @unit 170      : (0.489, 90.328)
+
+(loss, accuracy) @unit 171      : (0.489, 90.328)
+
+(loss, accuracy) @unit 172      : (0.489, 90.328)
+
+(loss, accuracy) @unit 173      : (0.489, 90.328)
+
+(loss, accuracy) @unit 174      : (0.489, 90.328)
+
+(loss, accuracy) @unit 175      : (0.489, 90.328)
+
+(loss, accuracy) @unit 176      : (0.489, 90.328)
+
+(loss, accuracy) @unit 177      : (0.489, 90.328)
+
+(loss, accuracy) @unit 178      : (0.489, 90.328)
+
+(loss, accuracy) @unit 179      : (0.489, 90.328)
+
+(loss, accuracy) @unit 180      : (0.489, 90.328)
+
+(loss, accuracy) @unit 181      : (0.489, 90.328)
+
+(loss, accuracy) @unit 182      : (0.489, 90.328)
+
+(loss, accuracy) @unit 183      : (0.489, 90.328)
+
+(loss, accuracy) @unit 184      : (0.489, 90.328)
+
+(loss, accuracy) @unit 185      : (0.489, 90.328)
+
+(loss, accuracy) @unit 186      : (0.489, 90.328)
+
+(loss, accuracy) @unit 187      : (0.489, 90.328)
+
+(loss, accuracy) @unit 188      : (0.489, 90.328)
+
+(loss, accuracy) @unit 189      : (0.489, 90.328)
+
+(loss, accuracy) @unit 190      : (0.489, 90.328)
+
+(loss, accuracy) @unit 191      : (0.489, 90.328)
+
+(loss, accuracy) @unit 192      : (0.489, 90.328)
+
+(loss, accuracy) @unit 193      : (0.489, 90.328)
+
+(loss, accuracy) @unit 194      : (0.489, 90.328)
+
+(loss, accuracy) @unit 195      : (0.489, 90.328)
+
+(loss, accuracy) @unit 196      : (0.489, 90.328)
+
+(loss, accuracy) @unit 197      : (0.489, 90.328)
+
+(loss, accuracy) @unit 198      : (0.489, 90.328)
+
+(loss, accuracy) @unit 199      : (0.489, 90.328)
+
+(loss, accuracy) @unit 200      : (0.489, 90.328)
+
+(loss, accuracy) @unit 201      : (0.489, 90.328)
+
+(loss, accuracy) @unit 202      : (0.489, 90.328)
+
+(loss, accuracy) @unit 203      : (0.489, 90.328)
+
+(loss, accuracy) @unit 204      : (0.489, 90.328)
+
+(loss, accuracy) @unit 205      : (0.489, 90.328)
+
+(loss, accuracy) @unit 206      : (0.489, 90.328)
+
+(loss, accuracy) @unit 207      : (0.489, 90.328)
+
+(loss, accuracy) @unit 208      : (0.489, 90.328)
+
+(loss, accuracy) @unit 209      : (0.489, 90.328)
+
+(loss, accuracy) @unit 210      : (0.489, 90.328)
+
+(loss, accuracy) @unit 211      : (0.489, 90.328)
+
+(loss, accuracy) @unit 212      : (0.489, 90.328)
+
+(loss, accuracy) @unit 213      : (0.489, 90.328)
+
+(loss, accuracy) @unit 214      : (0.489, 90.328)
+
+(loss, accuracy) @unit 215      : (0.489, 90.328)
+
+(loss, accuracy) @unit 216      : (0.489, 90.328)
+
+(loss, accuracy) @unit 217      : (0.489, 90.328)
+
+(loss, accuracy) @unit 218      : (0.489, 90.328)
+
+(loss, accuracy) @unit 219      : (0.489, 90.328)
+
+(loss, accuracy) @unit 220      : (0.489, 90.328)
+
+(loss, accuracy) @unit 221      : (0.489, 90.328)
+
+(loss, accuracy) @unit 222      : (0.489, 90.328)
+
+(loss, accuracy) @unit 223      : (0.489, 90.328)
+
+(loss, accuracy) @unit 224      : (0.489, 90.328)
+
+(loss, accuracy) @unit 225      : (0.489, 90.328)
+
+(loss, accuracy) @unit 226      : (0.489, 90.328)
+
+(loss, accuracy) @unit 227      : (0.489, 90.328)
+
+(loss, accuracy) @unit 228      : (0.489, 90.328)
+
+(loss, accuracy) @unit 229      : (0.489, 90.328)
+
+(loss, accuracy) @unit 230      : (0.489, 90.328)
+
+(loss, accuracy) @unit 231      : (0.489, 90.328)
+
+(loss, accuracy) @unit 232      : (0.489, 90.328)
+
+(loss, accuracy) @unit 233      : (0.489, 90.328)
+
+(loss, accuracy) @unit 234      : (0.489, 90.328)
+
+(loss, accuracy) @unit 235      : (0.489, 90.328)
+
+(loss, accuracy) @unit 236      : (0.489, 90.328)
+
+(loss, accuracy) @unit 237      : (0.489, 90.328)
+
+(loss, accuracy) @unit 238      : (0.489, 90.328)
+
+(loss, accuracy) @unit 239      : (0.489, 90.328)
+
+(loss, accuracy) @unit 240      : (0.489, 90.328)
+
+(loss, accuracy) @unit 241      : (0.489, 90.328)
+
+(loss, accuracy) @unit 242      : (0.489, 90.328)
+
+(loss, accuracy) @unit 243      : (0.489, 90.328)
+
+(loss, accuracy) @unit 244      : (0.489, 90.328)
+
+(loss, accuracy) @unit 245      : (0.489, 90.328)
+
+(loss, accuracy) @unit 246      : (0.489, 90.328)
+
+(loss, accuracy) @unit 247      : (0.489, 90.328)
+
+(loss, accuracy) @unit 248      : (0.489, 90.328)
+
+(loss, accuracy) @unit 249      : (0.489, 90.328)
+
+(loss, accuracy) @unit 250      : (0.489, 90.328)
+
+(loss, accuracy) @unit 251      : (0.489, 90.328)
+
+(loss, accuracy) @unit 252      : (0.489, 90.328)
+
+(loss, accuracy) @unit 253      : (0.489, 90.328)
+
+(loss, accuracy) @unit 254      : (0.489, 90.328)
+
+(loss, accuracy) @unit 255      : (0.489, 90.328)
+
+(loss, accuracy) @unit 256      : (0.489, 90.328)
+
+(loss, accuracy) @unit 257      : (0.489, 90.328)
+
+(loss, accuracy) @unit 258      : (0.489, 90.328)
+
+(loss, accuracy) @unit 259      : (0.489, 90.328)
+
+(loss, accuracy) @unit 260      : (0.489, 90.328)
+
+(loss, accuracy) @unit 261      : (0.489, 90.328)
+
+(loss, accuracy) @unit 262      : (0.489, 90.328)
+
+(loss, accuracy) @unit 263      : (0.489, 90.328)
+
+(loss, accuracy) @unit 264      : (0.489, 90.328)
+
+(loss, accuracy) @unit 265      : (0.489, 90.328)
+
+(loss, accuracy) @unit 266      : (0.489, 90.328)
+
+(loss, accuracy) @unit 267      : (0.489, 90.328)
+
+(loss, accuracy) @unit 268      : (0.489, 90.328)
+
+(loss, accuracy) @unit 269      : (0.489, 90.328)
+
+(loss, accuracy) @unit 270      : (0.489, 90.328)
+
+(loss, accuracy) @unit 271      : (0.489, 90.328)
+
+(loss, accuracy) @unit 272      : (0.489, 90.328)
+
+(loss, accuracy) @unit 273      : (0.489, 90.328)
+
+(loss, accuracy) @unit 274      : (0.489, 90.328)
+
+(loss, accuracy) @unit 275      : (0.489, 90.328)
+
+(loss, accuracy) @unit 276      : (0.489, 90.328)
+
+(loss, accuracy) @unit 277      : (0.489, 90.328)
+
+(loss, accuracy) @unit 278      : (0.489, 90.328)
+
+(loss, accuracy) @unit 279      : (0.489, 90.328)
+
+(loss, accuracy) @unit 280      : (0.489, 90.328)
+
+(loss, accuracy) @unit 281      : (0.489, 90.328)
+
+(loss, accuracy) @unit 282      : (0.489, 90.328)
+
+(loss, accuracy) @unit 283      : (0.489, 90.328)
+
+(loss, accuracy) @unit 284      : (0.489, 90.328)
+
+(loss, accuracy) @unit 285      : (0.489, 90.328)
+
+(loss, accuracy) @unit 286      : (0.489, 90.328)
+
+(loss, accuracy) @unit 287      : (0.489, 90.328)
+
+(loss, accuracy) @unit 288      : (0.489, 90.328)
+
+(loss, accuracy) @unit 289      : (0.489, 90.328)
+
+(loss, accuracy) @unit 290      : (0.489, 90.328)
+
+(loss, accuracy) @unit 291      : (0.489, 90.328)
+
+(loss, accuracy) @unit 292      : (0.489, 90.328)
+
+(loss, accuracy) @unit 293      : (0.489, 90.328)
+
+(loss, accuracy) @unit 294      : (0.489, 90.328)
+
+(loss, accuracy) @unit 295      : (0.489, 90.328)
+
+(loss, accuracy) @unit 296      : (0.489, 90.328)
+
+(loss, accuracy) @unit 297      : (0.489, 90.328)
+
+(loss, accuracy) @unit 298      : (0.489, 90.328)
+
+(loss, accuracy) @unit 299      : (0.489, 90.328)
+
+(loss, accuracy) @unit 300      : (0.489, 90.328)
+
+(loss, accuracy) @unit 301      : (0.489, 90.328)
+
+(loss, accuracy) @unit 302      : (0.489, 90.328)
+
+(loss, accuracy) @unit 303      : (0.489, 90.328)
+
+(loss, accuracy) @unit 304      : (0.489, 90.328)
+
+(loss, accuracy) @unit 305      : (0.489, 90.328)
+
+(loss, accuracy) @unit 306      : (0.489, 90.328)
+
+(loss, accuracy) @unit 307      : (0.489, 90.328)
+
+(loss, accuracy) @unit 308      : (0.489, 90.328)
+
+(loss, accuracy) @unit 309      : (0.489, 90.328)
+
+(loss, accuracy) @unit 310      : (0.489, 90.328)
+
+(loss, accuracy) @unit 311      : (0.489, 90.328)
+
+(loss, accuracy) @unit 312      : (0.489, 90.328)
+
+(loss, accuracy) @unit 313      : (0.489, 90.328)
+
+(loss, accuracy) @unit 314      : (0.489, 90.328)
+
+(loss, accuracy) @unit 315      : (0.489, 90.328)
+
+(loss, accuracy) @unit 316      : (0.489, 90.328)
+
+(loss, accuracy) @unit 317      : (0.489, 90.328)
+
+(loss, accuracy) @unit 318      : (0.489, 90.328)
+
+(loss, accuracy) @unit 319      : (0.489, 90.328)
+
+(loss, accuracy) @unit 320      : (0.489, 90.328)
+
+(loss, accuracy) @unit 321      : (0.489, 90.328)
+
+(loss, accuracy) @unit 322      : (0.489, 90.328)
+
+(loss, accuracy) @unit 323      : (0.489, 90.328)
+
+(loss, accuracy) @unit 324      : (0.489, 90.328)
+
+(loss, accuracy) @unit 325      : (0.489, 90.328)
+
+(loss, accuracy) @unit 326      : (0.489, 90.328)
+
+(loss, accuracy) @unit 327      : (0.489, 90.328)
+
+(loss, accuracy) @unit 328      : (0.489, 90.328)
+
+(loss, accuracy) @unit 329      : (0.489, 90.328)
+
+(loss, accuracy) @unit 330      : (0.489, 90.328)
+
+(loss, accuracy) @unit 331      : (0.489, 90.328)
+
+(loss, accuracy) @unit 332      : (0.489, 90.328)
+
+(loss, accuracy) @unit 333      : (0.489, 90.328)
+
+(loss, accuracy) @unit 334      : (0.489, 90.328)
+
+(loss, accuracy) @unit 335      : (0.489, 90.328)
+
+(loss, accuracy) @unit 336      : (0.489, 90.328)
+
+(loss, accuracy) @unit 337      : (0.489, 90.328)
+
+(loss, accuracy) @unit 338      : (0.489, 90.328)
+
+(loss, accuracy) @unit 339      : (0.489, 90.328)
+
+(loss, accuracy) @unit 340      : (0.489, 90.328)
+
+(loss, accuracy) @unit 341      : (0.489, 90.328)
+
+(loss, accuracy) @unit 342      : (0.489, 90.328)
+
+(loss, accuracy) @unit 343      : (0.489, 90.328)
+
+(loss, accuracy) @unit 344      : (0.489, 90.328)
+
+(loss, accuracy) @unit 345      : (0.489, 90.328)
+
+(loss, accuracy) @unit 346      : (0.489, 90.328)
+
+(loss, accuracy) @unit 347      : (0.489, 90.328)
+
+(loss, accuracy) @unit 348      : (0.489, 90.328)
+
+(loss, accuracy) @unit 349      : (0.489, 90.328)
+
+(loss, accuracy) @unit 350      : (0.489, 90.328)
+
+(loss, accuracy) @unit 351      : (0.489, 90.328)
+
+(loss, accuracy) @unit 352      : (0.489, 90.328)
+
+(loss, accuracy) @unit 353      : (0.489, 90.328)
+
+(loss, accuracy) @unit 354      : (0.489, 90.328)
+
+(loss, accuracy) @unit 355      : (0.489, 90.328)
+
+(loss, accuracy) @unit 356      : (0.489, 90.328)
+
+(loss, accuracy) @unit 357      : (0.489, 90.328)
+
+(loss, accuracy) @unit 358      : (0.489, 90.328)
+
+(loss, accuracy) @unit 359      : (0.489, 90.328)
+
+(loss, accuracy) @unit 360      : (0.489, 90.328)
+
+(loss, accuracy) @unit 361      : (0.489, 90.328)
+
+(loss, accuracy) @unit 362      : (0.489, 90.328)
+
+(loss, accuracy) @unit 363      : (0.489, 90.328)
+
+(loss, accuracy) @unit 364      : (0.489, 90.328)
+
+(loss, accuracy) @unit 365      : (0.489, 90.328)
+
+(loss, accuracy) @unit 366      : (0.489, 90.328)
+
+(loss, accuracy) @unit 367      : (0.489, 90.328)
+
+(loss, accuracy) @unit 368      : (0.489, 90.328)
+
+(loss, accuracy) @unit 369      : (0.489, 90.328)
+
+(loss, accuracy) @unit 370      : (0.489, 90.328)
+
+(loss, accuracy) @unit 371      : (0.489, 90.328)
+
+(loss, accuracy) @unit 372      : (0.489, 90.328)
+
+(loss, accuracy) @unit 373      : (0.489, 90.328)
+
+(loss, accuracy) @unit 374      : (0.489, 90.328)
+
+(loss, accuracy) @unit 375      : (0.489, 90.328)
+
+(loss, accuracy) @unit 376      : (0.489, 90.328)
+
+(loss, accuracy) @unit 377      : (0.489, 90.328)
+
+(loss, accuracy) @unit 378      : (0.489, 90.328)
+
+(loss, accuracy) @unit 379      : (0.489, 90.328)
+
+(loss, accuracy) @unit 380      : (0.489, 90.328)
+
+(loss, accuracy) @unit 381      : (0.489, 90.328)
+
+(loss, accuracy) @unit 382      : (0.489, 90.328)
+
+(loss, accuracy) @unit 383      : (0.489, 90.328)
+
+(loss, accuracy) @unit 384      : (0.489, 90.328)
+
+(loss, accuracy) @unit 385      : (0.489, 90.328)
+
+(loss, accuracy) @unit 386      : (0.489, 90.328)
+
+(loss, accuracy) @unit 387      : (0.489, 90.328)
+
+(loss, accuracy) @unit 388      : (0.489, 90.328)
+
+(loss, accuracy) @unit 389      : (0.489, 90.328)
+
+(loss, accuracy) @unit 390      : (0.489, 90.328)
+
+(loss, accuracy) @unit 391      : (0.489, 90.328)
+
+(loss, accuracy) @unit 392      : (0.489, 90.328)
+
+(loss, accuracy) @unit 393      : (0.489, 90.328)
+
+(loss, accuracy) @unit 394      : (0.489, 90.328)
+
+(loss, accuracy) @unit 395      : (0.489, 90.328)
+
+(loss, accuracy) @unit 396      : (0.489, 90.328)
+
+(loss, accuracy) @unit 397      : (0.489, 90.328)
+
+(loss, accuracy) @unit 398      : (0.489, 90.328)
+
+(loss, accuracy) @unit 399      : (0.489, 90.328)
+
+(loss, accuracy) @unit 400      : (0.489, 90.328)
+
+(loss, accuracy) @unit 401      : (0.489, 90.328)
+
+(loss, accuracy) @unit 402      : (0.489, 90.328)
+
+(loss, accuracy) @unit 403      : (0.489, 90.328)
+
+(loss, accuracy) @unit 404      : (0.489, 90.328)
+
+(loss, accuracy) @unit 405      : (0.489, 90.328)
+
+(loss, accuracy) @unit 406      : (0.489, 90.328)
+
+(loss, accuracy) @unit 407      : (0.489, 90.328)
+
+(loss, accuracy) @unit 408      : (0.489, 90.328)
+
+(loss, accuracy) @unit 409      : (0.489, 90.328)
+
+(loss, accuracy) @unit 410      : (0.489, 90.328)
+
+(loss, accuracy) @unit 411      : (0.489, 90.328)
+
+(loss, accuracy) @unit 412      : (0.489, 90.328)
+
+(loss, accuracy) @unit 413      : (0.489, 90.328)
+
+(loss, accuracy) @unit 414      : (0.489, 90.328)
+
+(loss, accuracy) @unit 415      : (0.489, 90.328)
+
+(loss, accuracy) @unit 416      : (0.489, 90.328)
+
+(loss, accuracy) @unit 417      : (0.489, 90.328)
+
+(loss, accuracy) @unit 418      : (0.489, 90.328)
+
+(loss, accuracy) @unit 419      : (0.489, 90.328)
+
+(loss, accuracy) @unit 420      : (0.489, 90.328)
+
+(loss, accuracy) @unit 421      : (0.489, 90.328)
+
+(loss, accuracy) @unit 422      : (0.489, 90.328)
+
+(loss, accuracy) @unit 423      : (0.489, 90.328)
+
+(loss, accuracy) @unit 424      : (0.489, 90.328)
+
+(loss, accuracy) @unit 425      : (0.489, 90.328)
+
+(loss, accuracy) @unit 426      : (0.489, 90.328)
+
+(loss, accuracy) @unit 427      : (0.489, 90.328)
+
+(loss, accuracy) @unit 428      : (0.489, 90.328)
+
+(loss, accuracy) @unit 429      : (0.489, 90.328)
+
+(loss, accuracy) @unit 430      : (0.489, 90.328)
+
+(loss, accuracy) @unit 431      : (0.489, 90.328)
+
+(loss, accuracy) @unit 432      : (0.489, 90.328)
+
+(loss, accuracy) @unit 433      : (0.489, 90.328)
+
+(loss, accuracy) @unit 434      : (0.489, 90.328)
+
+(loss, accuracy) @unit 435      : (0.489, 90.328)
+
+(loss, accuracy) @unit 436      : (0.489, 90.328)
+
+(loss, accuracy) @unit 437      : (0.489, 90.328)
+
+(loss, accuracy) @unit 438      : (0.489, 90.328)
+
+(loss, accuracy) @unit 439      : (0.489, 90.328)
+
+(loss, accuracy) @unit 440      : (0.489, 90.328)
+
+(loss, accuracy) @unit 441      : (0.489, 90.328)
+
+(loss, accuracy) @unit 442      : (0.489, 90.328)
+
+(loss, accuracy) @unit 443      : (0.489, 90.328)
+
+(loss, accuracy) @unit 444      : (0.489, 90.328)
+
+(loss, accuracy) @unit 445      : (0.489, 90.328)
+
+(loss, accuracy) @unit 446      : (0.489, 90.328)
+
+(loss, accuracy) @unit 447      : (0.489, 90.328)
+
+(loss, accuracy) @unit 448      : (0.489, 90.328)
+
+(loss, accuracy) @unit 449      : (0.489, 90.328)
+
+(loss, accuracy) @unit 450      : (0.489, 90.328)
+
+(loss, accuracy) @unit 451      : (0.489, 90.328)
+
+(loss, accuracy) @unit 452      : (0.489, 90.328)
+
+(loss, accuracy) @unit 453      : (0.489, 90.328)
+
+(loss, accuracy) @unit 454      : (0.489, 90.328)
+
+(loss, accuracy) @unit 455      : (0.489, 90.328)
+
+(loss, accuracy) @unit 456      : (0.489, 90.328)
+
+(loss, accuracy) @unit 457      : (0.489, 90.328)
+
+(loss, accuracy) @unit 458      : (0.489, 90.328)
+
+(loss, accuracy) @unit 459      : (0.489, 90.328)
+
+(loss, accuracy) @unit 460      : (0.489, 90.328)
+
+(loss, accuracy) @unit 461      : (0.489, 90.328)
+
+(loss, accuracy) @unit 462      : (0.489, 90.328)
+
+(loss, accuracy) @unit 463      : (0.489, 90.328)
+
+(loss, accuracy) @unit 464      : (0.489, 90.328)
+
+(loss, accuracy) @unit 465      : (0.489, 90.328)
+
+(loss, accuracy) @unit 466      : (0.489, 90.328)
+
+(loss, accuracy) @unit 467      : (0.489, 90.328)
+
+(loss, accuracy) @unit 468      : (0.489, 90.328)
+
+(loss, accuracy) @unit 469      : (0.489, 90.328)
+
+(loss, accuracy) @unit 470      : (0.489, 90.328)
+
+(loss, accuracy) @unit 471      : (0.489, 90.328)
+
+(loss, accuracy) @unit 472      : (0.489, 90.328)
+
+(loss, accuracy) @unit 473      : (0.489, 90.328)
+
+(loss, accuracy) @unit 474      : (0.489, 90.328)
+
+(loss, accuracy) @unit 475      : (0.489, 90.328)
+
+(loss, accuracy) @unit 476      : (0.489, 90.328)
+
+(loss, accuracy) @unit 477      : (0.489, 90.328)
+
+(loss, accuracy) @unit 478      : (0.489, 90.328)
+
+(loss, accuracy) @unit 479      : (0.489, 90.328)
+
+(loss, accuracy) @unit 480      : (0.489, 90.328)
+
+(loss, accuracy) @unit 481      : (0.489, 90.328)
+
+(loss, accuracy) @unit 482      : (0.489, 90.328)
+
+(loss, accuracy) @unit 483      : (0.489, 90.328)
+
+(loss, accuracy) @unit 484      : (0.489, 90.328)
+
+(loss, accuracy) @unit 485      : (0.489, 90.328)
+
+(loss, accuracy) @unit 486      : (0.489, 90.328)
+
+(loss, accuracy) @unit 487      : (0.489, 90.328)
+
+(loss, accuracy) @unit 488      : (0.489, 90.328)
+
+(loss, accuracy) @unit 489      : (0.489, 90.328)
+
+(loss, accuracy) @unit 490      : (0.489, 90.328)
+
+(loss, accuracy) @unit 491      : (0.489, 90.328)
+
+(loss, accuracy) @unit 492      : (0.489, 90.328)
+
+(loss, accuracy) @unit 493      : (0.489, 90.328)
+
+(loss, accuracy) @unit 494      : (0.489, 90.328)
+
+(loss, accuracy) @unit 495      : (0.489, 90.328)
+
+(loss, accuracy) @unit 496      : (0.489, 90.328)
+
+(loss, accuracy) @unit 497      : (0.489, 90.328)
+
+(loss, accuracy) @unit 498      : (0.489, 90.328)
+
+(loss, accuracy) @unit 499      : (0.489, 90.328)
+
+(loss, accuracy) @unit 500      : (0.489, 90.328)
+
+(loss, accuracy) @unit 501      : (0.489, 90.328)
+
+(loss, accuracy) @unit 502      : (0.489, 90.328)
+
+(loss, accuracy) @unit 503      : (0.489, 90.328)
+
+(loss, accuracy) @unit 504      : (0.489, 90.328)
+
+(loss, accuracy) @unit 505      : (0.489, 90.328)
+
+(loss, accuracy) @unit 506      : (0.489, 90.328)
+
+(loss, accuracy) @unit 507      : (0.489, 90.328)
+
+(loss, accuracy) @unit 508      : (0.489, 90.328)
+
+(loss, accuracy) @unit 509      : (0.489, 90.328)
+
+(loss, accuracy) @unit 510      : (0.489, 90.328)
+
+(loss, accuracy) @unit 511      : (0.489, 90.328)
+
+Unit == None
+\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+--------------------------------------------------------------------
+
+conclusion_count: 1
+
+selection_made: True

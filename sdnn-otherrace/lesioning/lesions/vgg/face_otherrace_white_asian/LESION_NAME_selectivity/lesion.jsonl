@@ -1,0 +1,5 @@
+{"meta/greedy_p": 0.25}
+{"meta/shuffle": false}
+{"meta/batch_size": 128}
+{"meta/max_batches": 50}
+{"meta/restore_epoch": -1}

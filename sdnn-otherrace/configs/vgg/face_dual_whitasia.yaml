@@ -13,7 +13,7 @@ save_directories:
     checkpoints_dir:  '/raid/elaheh_akbari/face_otherrace_white_asian/checkpoints/vgg/'
     log_dir:          '/raid/elaheh_akbari/face_otherrace_white_asian/runs/vgg/'
 saving:
-    keep:             [-1]
+    keep:             [10]
     function:         'step'
     params:           {'step': 1, 'offset': 0}
     max_count:        100
