@@ -8,13 +8,6 @@ import sys
 import copy
 import random
 
-# add the current directory to the PYTHONPATH so the custom modules can be imported
-sys.path.append('/home/elaheh_akbari/new/')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
-sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
-
 # custom modules
 import models
 from utils import tools
@@ -23,10 +16,10 @@ import yaml
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
-from sklearn import metrics as mrtx
+from sklearn import metrics
 import tqdm
-from utils.tools import precision as pres
-
+from utils.metrics import precision
+from sklearn import metrics
 import itertools
 import pandas as pd
 from tabulate import tabulate
@@ -292,12 +285,17 @@ class Config(object):
         num_classes = tools.get_num_classes(data_dir, islist=islist)
         return num_classes
     
-    def get_model(self, ngpus, pretrained=False, epoch=-1, dataParallel=False):
+    def get_model(self, ngpus, pretrained=False, epoch=-1, dataParallel=False, consol=False):
         if self.split:
             num_classes = (self._num_classes_task1, self._num_classes_task2)
         else:
             num_classes = self._num_classes
-            
+        
+        if consol:
+            num_classes = 424 # 1715 # 424
+        
+        print(num_classes)
+        
         model = tools.get_model(name=self._model_type, 
                                 num_classes=num_classes, 
                                 ngpus=ngpus, 
@@ -484,7 +482,7 @@ class Trainer(object):
             output = self.model(x=x, activations=activations)
         else:            
             output = self.model(x=x, task=self.task, activations=activations, gradients=gradients)
-        prec_1, prec_5 = pres(output=output, target=y, topk=(1,5))
+        prec_1, prec_5 = precision(output=output, target=y, topk=(1,5))
         prec_1 /= len(output)
         prec_5 /= len(output)             
         loss = self.criterion(output, y)
@@ -562,7 +560,7 @@ class Validator(object):
             output = self.model(x=x, activations=activations, gradients=gradients)
         else:
             output = self.model(x=x, task=self.task, activations=activations, gradients=gradients)
-        prec_1, prec_5 = pres(output=output, target=y, topk=(1,5))
+        prec_1, prec_5 = precision(output=output, target=y, topk=(1,5))
         prec_1 /= len(output)
         prec_5 /= len(output)
         loss = self.criterion(output,y)
@@ -570,8 +568,8 @@ class Validator(object):
         
         
 def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
-          valid_freq=0.5,save_freq=10,workers=1,ngpus=1,notebook=False, 
-          maxout=False, read_seed=None, use_scheduler=True, custom_learning_rate=None):
+          valid_freq=0.5,save_freq=5,workers=1,ngpus=1,notebook=False, 
+          maxout=False, read_seed=None, use_scheduler=True, custom_learning_rate=None, consol=False):
     
     np.random.seed(0)
     torch.manual_seed(0)
@@ -592,7 +590,10 @@ def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
     # Get Model
     config = Config(config_file=config_file)
     config.printAttributes()
-    model, ckpt_data = config.get_model(ngpus=ngpus, pretrained=pretrained, epoch=restore_epoch, dataParallel=True)
+    if consol:
+        model, ckpt_data = config.get_model(ngpus=ngpus, pretrained=pretrained,epoch=restore_epoch,dataParallel=False,consol=True)
+    else:
+        model, ckpt_data = config.get_model(ngpus=ngpus, pretrained=pretrained,epoch=restore_epoch,dataParallel=True,consol=False)
    
     checkpoints_exist = os.path.exists(config.checkpoints_dir)
         
@@ -639,6 +640,11 @@ def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
                       maxout=maxout,
                       read_seed=read_seed,
                       use_scheduler=use_scheduler)
+    
+    if consol:
+        consolidateTask(trainer=trainer, task='data_facecar_na', ngpus=1, consolidateModel=True)
+        # since already modified
+        consolidateTask(trainer=validator, task='data_facecar_na', ngpus=1, consolidateModel=False)
     
     if pretrained:
         start_epoch = ckpt_data['epoch'] + 1
@@ -798,7 +804,9 @@ def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
             writer.add_scalar('train/precision1', train_prec_1, global_step)
             writer.add_scalar('train/precision5', train_prec_5, global_step)
             if use_scheduler:
-                writer.add_scalar('meta/learning_rate',  trainer.scheduler.get_lr()[0], global_step) 
+                #writer.add_scalar('meta/learning_rate',  trainer.scheduler.get_lr()[0], global_step) 
+                
+                writer.add_scalar('meta/learning_rate',  trainer.optimizer.param_groups[0]['lr'], global_step)
             else:
                 writer.add_scalar('meta/learning_rate',  trainer.learning_rate, global_step) 
             writer.add_scalar('meta/progress',  progress, global_step) 
@@ -816,12 +824,13 @@ def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
             print("{0:<30}: {1:}".format('train_prec_1',  train_prec_1))
             print("{0:<30}: {1:}".format('train_prec_5',  train_prec_5))
             if use_scheduler:
-                print("{0:<30}: {1:}".format('learning_rate', trainer.scheduler.get_lr()[0]))
+                #print("{0:<30}: {1:}".format('learning_rate', trainer.scheduler.get_lr()[0]))
+                print("{0:<30}: {1:}".format('learning_rate', trainer.optimizer.param_groups[0]['lr']))
             else:
                 print("{0:<30}: {1:}".format('learning_rate', trainer.learning_rate))
             print('----------------------------')
             print()
-            
+        
             
         # Save Model
         if ((epoch % save_freq) == 0):
@@ -838,13 +847,14 @@ def train(config_file, pretrained=False, restore_epoch=-1,epochs=50,
             torch.save(ckpt_data, os.path.join(config.checkpoints_dir,f'epoch_{epoch:02d}.pth.tar'))
         
         if use_scheduler:
-            trainer.scheduler.step(epoch=epoch)
+            #trainer.scheduler.step(epoch=epoch)
+            trainer.scheduler.step(avg_valid_loss)
         writer.add_scalar('meta/epoch', epoch, global_step)  
     
     writer.close()
     
 def train_split(config_file, pretrained=False, restore_epoch=-1,
-                epochs=50, valid_freq=0.5,save_freq=10,workers=1,ngpus=1,notebook=False):
+                epochs=50, valid_freq=0.5,save_freq=5,workers=1,ngpus=1,notebook=False):
     
     np.random.seed(0)
     torch.manual_seed(0)
@@ -1077,10 +1087,11 @@ def train_split(config_file, pretrained=False, restore_epoch=-1,
             train_sec_per_iter = time.time() - train_start_time
             walltime += (time.time() - start_time)/(60.0**2)
             start_time = time.time()            
-            writer.add_scalar('meta/learning_rate',  trainer1.scheduler.get_lr()[0], global_step)  
+            #writer.add_scalar('meta/learning_rate',  trainer1.scheduler.get_lr()[0], global_step)  
+            writer.add_scalar('meta/learning_rate',  trainer1.optimizer.param_groups[0]['lr'], global_step)  
             writer.add_scalar('meta/progress',  (train_step+1.0)/train_num_steps, global_step) 
             writer.add_scalar('meta/train-sec-per-iter',  train_sec_per_iter, global_step) 
-            #writer.add_scalar('meta/valid-sec-per-iter',  valid_sec_per_iter, global_step) 
+            writer.add_scalar('meta/valid-sec-per-iter',  valid_sec_per_iter, global_step) 
             writer.add_scalar('meta/walltime', walltime, global_step) 
             
         # Save Model
@@ -1098,7 +1109,9 @@ def train_split(config_file, pretrained=False, restore_epoch=-1,
             ckpt_data['optimizer2']     = trainer2.optimizer.state_dict()
             torch.save(ckpt_data, os.path.join(config.checkpoints_dir,f'epoch_{epoch:02d}.pth.tar'))
  
-        trainer1.scheduler.step(epoch=epoch)
+        #trainer1.scheduler.step(epoch=epoch)
+        #trainer2.scheduler.step(epoch=epoch)
+        trainer1.scheduler.step()
         trainer2.scheduler.step(epoch=epoch)
         writer.add_scalar('meta/epoch', epoch, global_step)  
     
@@ -1370,6 +1383,7 @@ def predict_tqdm(model, data_loader, ngpus, task=None, topk=1, notebook=False, m
             paths = np.array(paths)
             if ngpus > 0:
                 y = y.cuda(non_blocking=True)
+                x = x.cuda(non_blocking=True)
             if task is None:
                 output = model(x=x)
                 softmax_output = softmax(output)
@@ -1404,10 +1418,10 @@ def predict_tqdm(model, data_loader, ngpus, task=None, topk=1, notebook=False, m
     return y_true_all, y_pred_all,  y_prob_all, paths_all, loss_, softmax_output_all
 
 def eval(y_true, y_pred):
-    acc = mrtx.accuracy_score(y_true, y_pred)
-    bal_acc = mrtx.balanced_accuracy_score(y_true, y_pred)
-    confusion_matrix = mrtx.confusion_matrix(y_true, y_pred)
-    report = mrtx.classification_report(y_true, y_pred)
+    acc = metrics.accuracy_score(y_true, y_pred)
+    bal_acc = metrics.balanced_accuracy_score(y_true, y_pred)
+    confusion_matrix = metrics.confusion_matrix(y_true, y_pred)
+    report = metrics.classification_report(y_true, y_pred)
     return acc, bal_acc, confusion_matrix, report
 
 
@@ -1577,7 +1591,7 @@ def keep_unit(validator, num_classes_task1, features_layer=None, classifier_laye
     return np.transpose(losses_all)
 
 
-def gradients_and_activations(activations=False, gradients=False, max_batches=None, validator=None, trainer=None, notebook=False):
+def gradients_and_activations(activations=False, gradients=False, max_batches=None, validator=None, trainer=None, notebook=False, consol=False):
     
     assert(trainer == None or validator == None), "Either trainer or validator must be None, but not both"
     
@@ -1588,6 +1602,9 @@ def gradients_and_activations(activations=False, gradients=False, max_batches=No
     
     all_activations = []
     all_gradients = []
+    
+    #if consol:
+    #    consolidateTask(validator=validator, task='data_facecar', ngpus=1, consolidateModel=True)
     
     if trainer is not None:
         data_loader = trainer.data_loader
@@ -1609,7 +1626,11 @@ def gradients_and_activations(activations=False, gradients=False, max_batches=No
                     all_activations=activations,
                     all_gradients=gradients)
             
-            activation = trainer.model.module.activations
+            if consol:
+                activation = trainer.model.activations
+            else:
+                activation = trainer.model.module.activations
+                
             for i in range(len(activation)):
                 print('before')
                 print(activation[i])
@@ -1619,7 +1640,12 @@ def gradients_and_activations(activations=False, gradients=False, max_batches=No
             torch.cuda.empty_cache()    
             all_activations.append(activation)
 
-            gradient   = trainer.model.module.get_activations_gradient()
+            if consol:
+                gradient   = trainer.model.get_activations_gradient()
+            else:
+                gradient   = trainer.model.module.get_activations_gradient()
+            
+            
             all_gradients.append(gradient)
             
             torch.cuda.empty_cache()
@@ -1632,7 +1658,13 @@ def gradients_and_activations(activations=False, gradients=False, max_batches=No
             validator.model.eval()
             with torch.no_grad():   
                 validator(x=x, y=y, activations=activations, gradients=False)
-            activation = validator.model.module.activations
+                
+            if consol:
+                activation = validator.model.activations
+            else:
+                activation = validator.model.module.activations
+                
+            
             for i in range(len(activation)):
                 #print('before')
                 #print(activation[i])
@@ -1642,8 +1674,11 @@ def gradients_and_activations(activations=False, gradients=False, max_batches=No
             torch.cuda.empty_cache() 
             all_activations.append(activation)
             
+            if consol:
+                gradient   = validator.model.get_activations_gradient()
+            else:
+                gradient   = validator.model.module.get_activations_gradient()
             
-            gradient   = validator.model.module.get_activations_gradient()
             all_gradients.append(gradient)
            
             assert(len(all_gradients[step]) == 0), "Something is wrong with gradients, tell Julio"
@@ -1700,7 +1735,7 @@ class ImageNetTrain(object):
         loss = self.loss(output, target)
         loss_ = loss.item()
         
-        top1, top5 = pres(output, target, topk=(1, 5))
+        top1, top5 = precision(output, target, topk=(1, 5))
         top1 /= len(output)
         top5 /= len(output)
         lr = self.lr.get_lr()[0]
@@ -1756,7 +1791,7 @@ class ImageNetVal(object):
                 output = self.model(inp)
 
                 loss += self.loss(output, target).item()
-                p1, p5 =pres(output, target, topk=(1, 5))
+                p1, p5 =precision(output, target, topk=(1, 5))
                 top1 += p1
                 top5 += p5
 
@@ -2059,7 +2094,7 @@ def get_base_predictions(validator,ngpus):
                                              reduce_loss=False)
     
     y_pred = np.squeeze(y_pred)
-    accuracy = mrtx.accuracy_score(y_true=y_true, y_pred=y_pred)
+    accuracy = metrics.accuracy_score(y_true=y_true, y_pred=y_pred)
     return accuracy, y_true, y_pred, paths
 
 def get_match_samples(validator, match_accuracy, ngpus, verbose=False):
@@ -2099,7 +2134,7 @@ def get_match_samples(validator, match_accuracy, ngpus, verbose=False):
         new_y_pred = np.delete(y_pred, removal_indexes).tolist()
         new_paths = np.delete(paths, removal_indexes).tolist()
 
-        new_accuracy = mrtx.accuracy_score(y_true=new_y_true, y_pred=new_y_pred)
+        new_accuracy = metrics.accuracy_score(y_true=new_y_true, y_pred=new_y_pred)
         #print('new accuracy:', new_accuracy)
         assert isclose(match_accuracy, new_accuracy, abs_tol=1e-1)
                 
@@ -2116,7 +2151,7 @@ def get_match_samples(validator, match_accuracy, ngpus, verbose=False):
         new_y_pred = np.delete(y_pred, removal_indexes).tolist()
         new_paths = np.delete(paths, removal_indexes).tolist()
 
-        new_accuracy = mrtx.accuracy_score(y_true=new_y_true, y_pred=new_y_pred)
+        new_accuracy = metrics.accuracy_score(y_true=new_y_true, y_pred=new_y_pred)
         #print('new accuracy:', new_accuracy)
         assert isclose(match_accuracy, new_accuracy, abs_tol=1e-1)
         
@@ -2170,7 +2205,7 @@ def get_subgroup_performances(subgroups_file, y_true, y_pred, losses):
     subgroup_performances = []
     for subgroup in np.sort(subgroup_ids):
         loss = np.mean(subgroups[subgroup]['losses'])
-        accuracy = mrtx.accuracy_score(subgroups[subgroup]['y_true'], subgroups[subgroup]['y_pred'])
+        accuracy = metrics.accuracy_score(subgroups[subgroup]['y_true'], subgroups[subgroup]['y_pred'])
         subgroup_performances.append((loss,accuracy))
 
     return subgroup_performances

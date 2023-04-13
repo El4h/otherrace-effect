@@ -34,7 +34,7 @@
 
 SORT_TASK_INDEX=1  #can be 0 or 1
 NONSORT_TASK_INDEX=0
-PARAM_GROUP_INDEX=4 # 0 1 2 3 4 5 6 7 8 9 10 11 12  # for vgg16 what layer we are lesioning
+PARAM_GROUP_INDEX=0 # 0 1 2 3 4 5 6 7 8 9 10 11 12  # for vgg16 what layer we are lesioning
 
 
 # CONFIG_FILE='configs/vgg/face_dual_whitasia.json'
@@ -49,7 +49,7 @@ NGPUS=1
 BATCH_SIZE=128
 MAX_BATCHES=50
 RESTORE_EPOCH=-1
-LESION_NAME='trial4' 
+LESION_NAME='layer0newenv' 
 ITER_SEED_TYPE='selection'
 READ_SEED=0
 MAXOUT='True'
@@ -95,20 +95,12 @@ echo '----------------------------------'
 
 
 
-# echo
-# echo 'sourcing the environment....'
-# source ../../env/bin/activate
-
-
-
-# echo 'sourcing complete'
-# echo
 
 echo 'submitting python script...'
 echo
 
 # umask 0002
 
-CUDA_VISIBLE_DEVICES=0 python3 katha_lesion.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --greedy_p $GREEDY_P --group_p $GROUP_P --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --max_batches $MAX_BATCHES --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --iterator_seed $ITER_SEED_TYPE --maxout $MAXOUT --read_seed $READ_SEED --randomize_classes $RAND_CLASSES --randomize_classes_seed $RAND_CLASSES_SEED >> output_$LESION_NAME.txt
+CUDA_VISIBLE_DEVICES=1 python3 katha_lesion.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --greedy_p $GREEDY_P --group_p $GROUP_P --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --max_batches $MAX_BATCHES --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --iterator_seed $ITER_SEED_TYPE --maxout $MAXOUT --read_seed $READ_SEED --randomize_classes $RAND_CLASSES --randomize_classes_seed $RAND_CLASSES_SEED >> output_$LESION_NAME.txt
 # --subgroups_file $SUBGROUPS_FILE # -
 
