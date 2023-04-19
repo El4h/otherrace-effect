@@ -663,12 +663,12 @@ def get_drop_loss(selected_units, candidate_units, validator, weight, bias, cach
     # drop units 
     # -------------------------
     drop_units = np.append(selected_units,candidate_units)
-    new_weight = weight.clone()
-    new_bias = bias.clone()
+    # new_weight = weight.clone()
+    # new_bias = bias.clone()
     for unit in drop_units:
-        new_weight[unit] = 0.0
+        weight[unit] = 0.0
         if bias is not None:
-            new_bias[unit]   = 0.0
+            bias[unit]   = 0.0
         
     # get loss on prediction
     # -------------------------
@@ -691,9 +691,9 @@ def get_drop_loss(selected_units, candidate_units, validator, weight, bias, cach
     # replace unit 
     # -------------------------
     for unit in drop_units:
-        new_weight[unit] = torch.from_numpy(cache['W'][unit])
+        weight[unit] = torch.from_numpy(cache['W'][unit])
         if bias is not None:
-            new_bias[unit]   = torch.from_numpy(cache['b'][unit]) 
+            bias[unit]   = torch.from_numpy(cache['b'][unit]) 
     
     y_pred = np.squeeze(y_pred)
     accuracy = metrics.accuracy_score(y_true=y_true, y_pred=y_pred)
