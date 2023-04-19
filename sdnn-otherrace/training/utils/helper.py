@@ -8,6 +8,14 @@ import sys
 import copy
 import random
 
+
+sys.path.append('/home/elaheh_akbari/new/')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/models')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training')
+sys.path.append('/home/elaheh_akbari/new/sdnn-otherrace/training/utils')
+
+
 # custom modules
 import models
 from utils import tools
