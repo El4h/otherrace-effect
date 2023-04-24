@@ -40,8 +40,8 @@ CONFIG_FILE='./configs/vgg/face_dual_whitasia.yaml'
 
 
 
-GREEDY_P=0.25 # 0.2
-GROUP_P=0.016 # 0.016
+GREEDY_P=0.25 # 0.25 * num_units should be chosen in the end
+GROUP_P=0.016 # num_units * group_p units are chosen at each step
 NGPUS=1
 BATCH_SIZE=128
 MAX_BATCHES=50
@@ -104,7 +104,7 @@ echo 'submitting python script...'
 echo
 
 
-CUDA_VISIBLE_DEVICES=1 python3 lesionGroupFixingParser.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --greedy_p $GREEDY_P --group_p $GROUP_P --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --max_batches $MAX_BATCHES --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --iterator_seed $ITER_SEED_TYPE --maxout $MAXOUT --read_seed $READ_SEED --randomize_classes $RAND_CLASSES --randomize_classes_seed $RAND_CLASSES_SEED >> output_$LESION_NAME.txt
+CUDA_VISIBLE_DEVICES=3 python3 lesionGroupFixingParser.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --greedy_p $GREEDY_P --group_p $GROUP_P --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --max_batches $MAX_BATCHES --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --iterator_seed $ITER_SEED_TYPE --maxout $MAXOUT --read_seed $READ_SEED --randomize_classes $RAND_CLASSES --randomize_classes_seed $RAND_CLASSES_SEED >> output_$LESION_NAME.txt
 # --subgroups_file $SUBGROUPS_FILE # -
 
 #CUDA_VISIBLE_DEVICES=0 python lesionEval.py --config_file $CONFIG_FILE --param_group_index $PARAM_GROUP_INDEX --shuffle $SHUFFLE --ngpus $NGPUS --batch_size $BATCH_SIZE --maxout $MAXOUT --sort_task_index $SORT_TASK_INDEX --nonsort_task_index $NONSORT_TASK_INDEX --restore_epoch $RESTORE_EPOCH --lesion_name $LESION_NAME --eval_version $EVAL_VERSION --drop_percents_beg $DROP_PERCENTS_BEG --drop_percents_end $DROP_PERCENTS_END --drop_percents_stepsize $DROP_PERCENTS_STEPSIZE --iterator_seed $ITERATOR_SEED
